@@ -9,7 +9,7 @@ import java.util.Objects;
 public class HttpResponseImpl implements HttpResponse {
     private int statusCode = 200;
     private String statusMessage = "OK";
-    private Map<String, String> headers = new HashMap();
+    private Map<String, String> headers = new HashMap<>();
     private String body;
 
     @Override

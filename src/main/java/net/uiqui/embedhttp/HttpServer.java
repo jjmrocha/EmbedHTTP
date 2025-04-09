@@ -8,7 +8,6 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 public class HttpServer {
-    private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 0;
     private static final int DEFAULT_BACKLOG = 10;
 
