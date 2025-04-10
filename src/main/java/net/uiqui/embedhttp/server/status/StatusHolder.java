@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp.status;
+package net.uiqui.embedhttp.server.status;
 
 import java.util.Collections;
 import java.util.Map;

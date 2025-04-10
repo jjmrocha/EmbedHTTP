@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp.routing;
+package net.uiqui.embedhttp.api;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

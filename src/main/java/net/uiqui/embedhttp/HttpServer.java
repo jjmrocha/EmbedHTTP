@@ -1,5 +1,7 @@
 package net.uiqui.embedhttp;
 
+import net.uiqui.embedhttp.api.HttpRequestHandler;
+import net.uiqui.embedhttp.routing.Router;
 import net.uiqui.embedhttp.server.ServerInstance;
 
 import java.util.List;
@@ -21,17 +23,13 @@ public class HttpServer {
         serverInstance = new ServerInstance(port, backlog);
     }
 
-    public boolean start(List<HttpRequestHandler> handlers) {
-        requireNonNull(handlers, "Handlers cannot be null");
+    public boolean start(Router router) {
+        requireNonNull(router, "Router cannot be null");
         try {
-            return serverInstance.start(handlers);
+            return serverInstance.start(router);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public boolean start(HttpRequestHandler... handlers) {
-        return start(asList(handlers));
     }
 
     public boolean stop() {

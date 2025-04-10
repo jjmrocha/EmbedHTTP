@@ -1,13 +1,12 @@
 package net.uiqui.embedhttp.server;
 
-import net.uiqui.embedhttp.HttpRequestHandler;
-import net.uiqui.embedhttp.status.Status;
-import net.uiqui.embedhttp.status.StatusHolder;
+import net.uiqui.embedhttp.routing.Router;
+import net.uiqui.embedhttp.server.status.Status;
+import net.uiqui.embedhttp.server.status.StatusHolder;
 
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.List;
 
 public class ServerInstance {
     private final StatusHolder serverStatus = new StatusHolder(Status.STOPPED);
@@ -19,7 +18,7 @@ public class ServerInstance {
         this.backlog = backlog;
     }
 
-    public boolean start(List<HttpRequestHandler> handlers) throws Exception {
+    public boolean start(Router router) throws Exception {
         if (serverStatus.getCurrentStatus() == Status.RUNNING) {
             return true;
         }
@@ -39,7 +38,7 @@ public class ServerInstance {
                 while (serverStatus.getCurrentStatus() == Status.RUNNING) {
                     try {
                         Socket clientSocket = serverSocket.accept();
-                        handleRequest(clientSocket, handlers);
+                        handleRequest(clientSocket, router);
                     } catch (SocketException e) {
                         if (!serverSocket.isClosed()) throw e;
                     }
@@ -55,7 +54,7 @@ public class ServerInstance {
         return newstatus == Status.RUNNING;
     }
 
-    private void handleRequest(Socket clientSocket, List<HttpRequestHandler> handlers) {
+    private void handleRequest(Socket clientSocket, Router router) {
 
     }
 

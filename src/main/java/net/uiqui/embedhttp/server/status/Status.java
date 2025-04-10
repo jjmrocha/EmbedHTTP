@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp.status;
+package net.uiqui.embedhttp.server.status;
 
 public enum Status {
     STARTING,

@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp;
+package net.uiqui.embedhttp.api;
 
 public interface HttpResponse {
     void setStatus(int statusCode, String statusMessage);

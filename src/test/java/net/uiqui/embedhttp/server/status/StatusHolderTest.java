@@ -1,5 +1,7 @@
-package net.uiqui.embedhttp.status;
+package net.uiqui.embedhttp.server.status;
 
+import net.uiqui.embedhttp.server.status.Status;
+import net.uiqui.embedhttp.server.status.StatusHolder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

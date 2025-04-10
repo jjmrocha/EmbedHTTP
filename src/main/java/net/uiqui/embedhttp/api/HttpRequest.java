@@ -1,10 +1,12 @@
-package net.uiqui.embedhttp;
+package net.uiqui.embedhttp.api;
 
 import java.util.Map;
 
 public interface HttpRequest {
-    String getMethod();
+    HttpMethod getMethod();
+    String getURL();
     String getPath();
+    Map<String, String> getPathParameters();
     Map<String, String> getQueryParameters();
     Map<String, String> getHeaders();
     String getBody();

@@ -1,6 +1,6 @@
-package net.uiqui.embedhttp.impl;
+package net.uiqui.embedhttp.api.impl;
 
-import net.uiqui.embedhttp.HttpResponse;
+import net.uiqui.embedhttp.api.HttpResponse;
 
 import java.util.HashMap;
 import java.util.Map;

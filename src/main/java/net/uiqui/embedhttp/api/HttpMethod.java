@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp.routing;
+package net.uiqui.embedhttp.api;
 
 public enum HttpMethod {
     GET,
