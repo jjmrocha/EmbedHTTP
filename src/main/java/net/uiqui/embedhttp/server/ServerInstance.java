@@ -27,7 +27,7 @@ public class ServerInstance {
             return false;
         }
 
-        if (serverStatus.setStatus(Status.STARTING)) {
+        if (!serverStatus.setStatus(Status.STARTING)) {
             return false;
         }
 
@@ -40,7 +40,7 @@ public class ServerInstance {
                         Socket clientSocket = serverSocket.accept();
                         handleRequest(clientSocket, router);
                     } catch (SocketException e) {
-                        if (!serverSocket.isClosed()) throw e;
+                        throw e;
                     }
                 }
             } catch (Exception e) {

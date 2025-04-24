@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 
 public class Router {
     private final Map<HttpMethod, List<Route>> routingTable;
@@ -25,16 +24,10 @@ public class Router {
         return routingTable.getOrDefault(method, emptyList());
     }
 
-    public List<Route> getAllRoutes() {
-        return routingTable.values().stream()
-                .flatMap(List::stream)
-                .collect(toList());
-    }
-
     public RoutedRequest findRoute(Request request) {
-        var validRoutes = routingTable.get(request.getMethod());
+        var validRoutes = getRoutes(request.getMethod());
 
-        if (validRoutes == null) {
+        if (validRoutes.isEmpty()) {
             return null;
         }
 

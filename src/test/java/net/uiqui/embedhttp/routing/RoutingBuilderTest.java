@@ -1,20 +1,18 @@
 package net.uiqui.embedhttp.routing;
 
 import net.uiqui.embedhttp.api.HttpMethod;
-import net.uiqui.embedhttp.api.HttpRequest;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
-import net.uiqui.embedhttp.api.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RoutingBuilderTest {
 
     @Test
-    void newRouter() {
+    void testNewRouter() {
         // given
-        HttpRequestHandler handler = (request, response) -> {};
+        HttpRequestHandler handler = (request, response) -> {
+        };
         // when
         var result = RoutingBuilder.newRouter()
                 .get("/get", handler)
@@ -27,12 +25,12 @@ class RoutingBuilderTest {
                 .build();
         // then
         assertThat(result).isInstanceOf(Router.class);
-        assertThat(result.getRoutes(HttpMethod.GET)).contains(new Route(HttpMethod.GET, "/get", handler));
-        assertThat(result.getRoutes(HttpMethod.POST)).contains(new Route(HttpMethod.POST, "/post", handler));
-        assertThat(result.getRoutes(HttpMethod.PUT)).contains(new Route(HttpMethod.PUT, "/put", handler));
-        assertThat(result.getRoutes(HttpMethod.DELETE)).contains(new Route(HttpMethod.DELETE, "/delete", handler));
-        assertThat(result.getRoutes(HttpMethod.HEAD)).contains(new Route(HttpMethod.HEAD, "/head", handler));
-        assertThat(result.getRoutes(HttpMethod.OPTIONS)).contains(new Route(HttpMethod.OPTIONS, "/options", handler));
-        assertThat(result.getRoutes(HttpMethod.PATCH)).contains(new Route(HttpMethod.PATCH, "/patch", handler));
+        assertThat(result.getRoutes(HttpMethod.GET)).containsExactly(new Route(HttpMethod.GET, "/get", handler));
+        assertThat(result.getRoutes(HttpMethod.POST)).containsExactly(new Route(HttpMethod.POST, "/post", handler));
+        assertThat(result.getRoutes(HttpMethod.PUT)).containsExactly(new Route(HttpMethod.PUT, "/put", handler));
+        assertThat(result.getRoutes(HttpMethod.DELETE)).containsExactly(new Route(HttpMethod.DELETE, "/delete", handler));
+        assertThat(result.getRoutes(HttpMethod.HEAD)).containsExactly(new Route(HttpMethod.HEAD, "/head", handler));
+        assertThat(result.getRoutes(HttpMethod.OPTIONS)).containsExactly(new Route(HttpMethod.OPTIONS, "/options", handler));
+        assertThat(result.getRoutes(HttpMethod.PATCH)).containsExactly(new Route(HttpMethod.PATCH, "/patch", handler));
     }
 }

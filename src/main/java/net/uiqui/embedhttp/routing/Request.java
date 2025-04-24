@@ -7,7 +7,7 @@ import java.util.Map;
 public class Request {
     private final HttpMethod method;
     private final String url;
-    private Map<String, String> headers;
+    private final Map<String, String> headers;
     private final String body;
 
     public Request(HttpMethod method, String url, Map<String, String> headers, String body) {
