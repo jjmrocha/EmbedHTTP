@@ -2,11 +2,11 @@ package net.uiqui.embedhttp.routing;
 
 import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
+import net.uiqui.embedhttp.server.Request;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RouterTest {
     @Test
@@ -72,19 +72,5 @@ class RouterTest {
         assertThat(foundRoute2.getPathParameters()).containsEntry("id", "123");
         assertThat(foundRoute3).isNull();
         assertThat(foundRoute4).isNull();
-    }
-
-    @Test
-    void testExtractPath() {
-        // given
-        Router router = new Router();
-        String urlWithQuery = "/path/to/resource?param=value";
-        String urlWithoutQuery = "/path/to/resource";
-        // when
-        var pathWithQuery = router.extractPath(urlWithQuery);
-        var pathWithoutQuery = router.extractPath(urlWithoutQuery);
-        // then
-        assertEquals("/path/to/resource", pathWithQuery);
-        assertEquals("/path/to/resource", pathWithoutQuery);
     }
 }

@@ -1,6 +1,8 @@
 package net.uiqui.embedhttp.routing;
 
 import net.uiqui.embedhttp.api.HttpMethod;
+import net.uiqui.embedhttp.api.impl.HttpRequestImpl;
+import net.uiqui.embedhttp.server.Request;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,17 +26,15 @@ public class Router {
         return routingTable.getOrDefault(method, emptyList());
     }
 
-    public RoutedRequest findRoute(Request request) {
+    public HttpRequestImpl findRoute(Request request) {
         var validRoutes = getRoutes(request.getMethod());
 
         if (validRoutes.isEmpty()) {
             return null;
         }
 
-        var path = extractPath(request.getUrl());
-
         for (Route route : validRoutes) {
-            var matcher = route.getPathRegexPattern().matcher(path);
+            var matcher = route.getPathRegexPattern().matcher(request.getPath());
 
             if (!matcher.matches()) {
                 continue;
@@ -48,19 +48,9 @@ public class Router {
                 pathParameters.put(key, value);
             }
 
-            return new RoutedRequest(request, route, pathParameters);
+            return new HttpRequestImpl(request, route, pathParameters);
         }
 
         return null;
-    }
-
-    protected String extractPath(String url) {
-        int queryIndex = url.indexOf('?');
-
-        if (queryIndex != -1) {
-            return url.substring(0, queryIndex);
-        } else {
-            return url;
-        }
     }
 }

@@ -14,7 +14,7 @@ public class Route {
     public Route(HttpMethod method, String pathPattern, HttpRequestHandler handler) {
         this.method = method;
         this.pathPattern = pathPattern;
-        this.pathRegexPattern = PathCompiler.compile(pathPattern);
+        this.pathRegexPattern = PathPatternCompiler.compile(pathPattern);
         this.handler = handler;
     }
 

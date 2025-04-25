@@ -2,7 +2,7 @@ package net.uiqui.embedhttp.routing;
 
 import java.util.regex.Pattern;
 
-public class PathCompiler {
+public class PathPatternCompiler {
     private static final Pattern paramPattern = Pattern.compile(":([a-zA-Z_][a-zA-Z0-9_]*)");
 
     protected static String pathToRegex(String path) {
