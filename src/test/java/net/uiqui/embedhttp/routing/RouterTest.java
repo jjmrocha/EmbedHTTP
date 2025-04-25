@@ -64,12 +64,12 @@ class RouterTest {
         var foundRoute4 = router.findRoute(request4);
         // then
         assertThat(foundRoute1).isNotNull();
-        assertThat(foundRoute1.getRoute()).isEqualTo(route1);
-        assertThat(foundRoute1.getRequest()).isEqualTo(request1);
+        assertThat(foundRoute1.route()).isEqualTo(route1);
+        assertThat(foundRoute1.request()).isEqualTo(request1);
         assertThat(foundRoute2).isNotNull();
-        assertThat(foundRoute2.getRoute()).isEqualTo(route2);
-        assertThat(foundRoute2.getRequest()).isEqualTo(request2);
-        assertThat(foundRoute2.getPathParameters()).containsEntry("id", "123");
+        assertThat(foundRoute2.route()).isEqualTo(route2);
+        assertThat(foundRoute2.request()).isEqualTo(request2);
+        assertThat(foundRoute2.pathParameters()).containsEntry("id", "123");
         assertThat(foundRoute3).isNull();
         assertThat(foundRoute4).isNull();
     }

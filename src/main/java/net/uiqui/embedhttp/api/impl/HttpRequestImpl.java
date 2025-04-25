@@ -10,25 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequestImpl implements HttpRequest {
-    private final Request request;
-    private final Route route;
-    private final Map<String, String> pathParameters;
-
-    public HttpRequestImpl(Request request, Route route, Map<String, String> pathParameters) {
-        this.request = request;
-        this.route = route;
-        this.pathParameters = pathParameters;
-    }
-
-    public Request getRequest() {
-        return request;
-    }
-
-    public Route getRoute() {
-        return route;
-    }
-
+public record HttpRequestImpl(Request request, Route route, Map<String, String> pathParameters) implements HttpRequest {
     @Override
     public HttpMethod getMethod() {
         return request.getMethod();
@@ -42,10 +24,6 @@ public class HttpRequestImpl implements HttpRequest {
     @Override
     public String getPath() {
         return request.getPath();
-    }
-
-    public Map<String, String> getPathParameters() {
-        return pathParameters;
     }
 
     @Override

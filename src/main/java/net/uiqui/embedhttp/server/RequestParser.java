@@ -10,9 +10,9 @@ import java.util.Map;
 public class RequestParser {
     public static Request parseRequest(InputStream inputStream) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            RequestLine requestLine = decodeRequestLine(reader);
-            Map<String, String> headers = decodeRequestHeaders(reader);
-            String body = decodeRequestBody(reader, headers);
+            var requestLine = decodeRequestLine(reader);
+            var headers = decodeRequestHeaders(reader);
+            var body = decodeRequestBody(reader, headers);
 
             return new Request(requestLine.method(), requestLine.url(), headers, body);
         }
