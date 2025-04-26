@@ -1,5 +1,8 @@
 package net.uiqui.embedhttp.api;
 
+/**
+ * Enum representing HTTP status codes and their associated reason phrases.
+ */
 public enum HttpStatusCode {
     OK(200, "OK"),
     CREATED(201, "Created"),
@@ -25,10 +28,18 @@ public enum HttpStatusCode {
         this.reasonPhrase = reasonPhrase;
     }
 
+    /**
+     * Enum representing HTTP status codes and their associated reason phrases.
+     */
     public int getCode() {
         return code;
     }
 
+    /**
+     * Gets the reason phrase associated with the HTTP status code.
+     *
+     * @return the reason phrase
+     */
     public String getReasonPhrase() {
         return reasonPhrase;
     }

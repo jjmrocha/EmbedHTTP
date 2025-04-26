@@ -1,5 +1,9 @@
 package net.uiqui.embedhttp.api;
 
+/**
+ * Enum representing common HTTP headers.
+ * Provides a mapping between header names and their string values.
+ */
 public enum HttpHeader {
     ACCEPT("Accept"),
     ACCEPT_ENCODING("Accept-Encoding"),
@@ -24,6 +28,11 @@ public enum HttpHeader {
         this.value = value;
     }
 
+    /**
+     * Gets the string value of the HTTP header.
+     *
+     * @return the string value of the header
+     */
     public String getValue() {
         return value;
     }

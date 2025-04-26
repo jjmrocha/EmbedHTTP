@@ -1,5 +1,8 @@
 package net.uiqui.embedhttp.api;
 
+/**
+ * Enum representing the HTTP methods supported by the server.
+ */
 public enum HttpMethod {
     GET,
     POST,
@@ -9,6 +12,13 @@ public enum HttpMethod {
     OPTIONS,
     HEAD;
 
+    /**
+     * Converts a string to its corresponding HttpMethod enum value.
+     *
+     * @param method the HTTP method as a string
+     * @return the corresponding HttpMethod enum value
+     * @throws IllegalArgumentException if the method is not recognized
+     */
     public static HttpMethod fromString(String method) {
         var upperCaseMethod = method.toUpperCase();
 
