@@ -1,12 +1,8 @@
 package net.uiqui.embedhttp;
 
-import net.uiqui.embedhttp.api.HttpRequestHandler;
 import net.uiqui.embedhttp.routing.Router;
 import net.uiqui.embedhttp.server.ServerInstance;
 
-import java.util.List;
-
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 public class HttpServer {

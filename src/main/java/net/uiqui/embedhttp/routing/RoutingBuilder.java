@@ -1,7 +1,7 @@
 package net.uiqui.embedhttp.routing;
 
-import net.uiqui.embedhttp.api.HttpRequestHandler;
 import net.uiqui.embedhttp.api.HttpMethod;
+import net.uiqui.embedhttp.api.HttpRequestHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ public class RoutingBuilder {
         return new RoutingBuilder();
     }
 
-    private  RoutingBuilder withRoute(HttpMethod method, String pathPattern, HttpRequestHandler handler) {
+    private RoutingBuilder withRoute(HttpMethod method, String pathPattern, HttpRequestHandler handler) {
         var route = new Route(
                 method,
                 pathPattern,

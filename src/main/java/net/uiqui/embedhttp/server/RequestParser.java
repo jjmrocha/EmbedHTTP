@@ -1,13 +1,19 @@
 package net.uiqui.embedhttp.server;
 
+import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpMethod;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RequestParser {
+    private static final String TRANSFER_ENCODING_CHUNKED = "chunked";
+
     public static Request parseRequest(InputStream inputStream) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             var requestLine = decodeRequestLine(reader);
@@ -59,12 +65,12 @@ public class RequestParser {
     }
 
     private static String decodeRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
-        if (headers.containsKey("Content-Length")) {
-            var contentLength = Integer.parseInt(headers.get("Content-Length"));
+        if (headers.containsKey(HttpHeader.CONTENT_LENGTH.getValue())) {
+            var contentLength = Integer.parseInt(headers.get(HttpHeader.CONTENT_LENGTH.getValue()));
             return readFixedSizeBodyChunk(reader, contentLength);
         }
 
-        if ("chunked".equalsIgnoreCase(headers.get("Transfer-Encoding"))) {
+        if (TRANSFER_ENCODING_CHUNKED.equalsIgnoreCase(headers.get(HttpHeader.TRANSFER_ENCODING.getValue()))) {
             return readChunkedBody(reader);
         }
 
@@ -120,5 +126,6 @@ public class RequestParser {
         }
     }
 
-    protected record RequestLine(HttpMethod method, String url, String version) {}
+    protected record RequestLine(HttpMethod method, String url, String version) {
+    }
 }

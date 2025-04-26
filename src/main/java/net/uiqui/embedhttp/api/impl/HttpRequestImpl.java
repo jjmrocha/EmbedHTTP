@@ -2,8 +2,8 @@ package net.uiqui.embedhttp.api.impl;
 
 import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequest;
-import net.uiqui.embedhttp.server.Request;
 import net.uiqui.embedhttp.routing.Route;
+import net.uiqui.embedhttp.server.Request;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

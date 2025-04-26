@@ -1,9 +1,10 @@
 package net.uiqui.embedhttp.routing;
 
+import net.uiqui.embedhttp.api.HttpMethod;
+import net.uiqui.embedhttp.api.HttpRequestHandler;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
-import net.uiqui.embedhttp.api.HttpRequestHandler;
-import net.uiqui.embedhttp.api.HttpMethod;
 
 public class Route {
     private final HttpMethod method;
