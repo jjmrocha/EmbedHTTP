@@ -1,5 +1,7 @@
 package net.uiqui.embedhttp.api;
 
+import net.uiqui.embedhttp.ContentType;
+
 /**
  * Class representing an HTTP response.
  * Contains details such as the status code, headers, and body.
@@ -39,6 +41,13 @@ public interface HttpResponse {
     /**
      * Sets the content type of the response.
      *
+     * @param contentType the content type
+     */
+    void setContentType(ContentType contentType);
+
+    /**
+     * Sets the content type of the response.
+     *
      * @param contentType the content type as a string
      */
     void setContentType(String contentType);
@@ -49,4 +58,12 @@ public interface HttpResponse {
      * @param body the body as a string
      */
     void setBody(String body);
+
+    /**
+     * Sets the body of the response with a specific content type.
+     *
+     * @param contentType the content type
+     * @param body        the body as a string
+     */
+    void setBody(ContentType contentType, String body);
 }

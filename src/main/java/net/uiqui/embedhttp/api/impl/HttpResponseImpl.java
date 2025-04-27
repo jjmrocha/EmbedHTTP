@@ -1,5 +1,6 @@
 package net.uiqui.embedhttp.api.impl;
 
+import net.uiqui.embedhttp.ContentType;
 import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.api.HttpStatusCode;
@@ -22,6 +23,7 @@ public class HttpResponseImpl implements HttpResponse {
 
     @Override
     public void setStatus(int statusCode, String statusMessage) {
+        Objects.requireNonNull(statusMessage, "Status message cannot be null");
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
     }
@@ -41,9 +43,23 @@ public class HttpResponseImpl implements HttpResponse {
     }
 
     @Override
+    public void setContentType(ContentType contentType) {
+        Objects.requireNonNull(contentType, "Content-Type cannot be null");
+        setContentType(contentType.getValue());
+    }
+
+    @Override
     public void setContentType(String contentType) {
         Objects.requireNonNull(contentType, "Content-Type cannot be null");
         setHeader(HttpHeader.CONTENT_TYPE, contentType);
+    }
+
+    @Override
+    public void setBody(ContentType contentType, String body) {
+        Objects.requireNonNull(contentType, "Content-Type cannot be null");
+        Objects.requireNonNull(body, "Body cannot be null");
+        setContentType(contentType);
+        setBody(body);
     }
 
     @Override
