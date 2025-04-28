@@ -1,6 +1,6 @@
 package net.uiqui.embedhttp.server;
 
-import net.uiqui.embedhttp.ContentType;
+import net.uiqui.embedhttp.api.ContentType;
 import net.uiqui.embedhttp.api.HttpStatusCode;
 import net.uiqui.embedhttp.api.impl.HttpResponseImpl;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package net.uiqui.embedhttp.server;
 
-import net.uiqui.embedhttp.routing.Router;
+import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.server.status.Status;
 import net.uiqui.embedhttp.server.status.StatusHolder;
 

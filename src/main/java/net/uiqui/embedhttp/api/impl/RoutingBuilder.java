@@ -1,61 +1,63 @@
-package net.uiqui.embedhttp.routing;
+package net.uiqui.embedhttp.api.impl;
 
+import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
+import net.uiqui.embedhttp.routing.Route;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class RoutingBuilder {
-    private final List<Route> routeList = new ArrayList<>();
+import static java.util.Collections.emptyList;
 
-    private RoutingBuilder() {
-        // Private constructor to prevent instantiation
-    }
-
-    public static RoutingBuilder newRouter() {
-        return new RoutingBuilder();
-    }
+public abstract class RoutingBuilder implements Router {
+    private final Map<HttpMethod, List<Route>> routingTable = new HashMap<>();
 
     private RoutingBuilder withRoute(HttpMethod method, String pathPattern, HttpRequestHandler handler) {
-        var route = new Route(
-                method,
-                pathPattern,
-                handler
-        );
-        routeList.add(route);
+        var route = new Route(method, pathPattern, handler);
+        routingTable.computeIfAbsent(method, k -> new ArrayList<>())
+                .add(route);
         return this;
     }
 
+    @Override
     public RoutingBuilder get(String pathPattern, HttpRequestHandler handler) {
         return withRoute(HttpMethod.GET, pathPattern, handler);
     }
 
+    @Override
     public RoutingBuilder post(String pathPattern, HttpRequestHandler handler) {
         return withRoute(HttpMethod.POST, pathPattern, handler);
     }
 
+    @Override
     public RoutingBuilder put(String pathPattern, HttpRequestHandler handler) {
         return withRoute(HttpMethod.PUT, pathPattern, handler);
     }
 
+    @Override
     public RoutingBuilder delete(String pathPattern, HttpRequestHandler handler) {
         return withRoute(HttpMethod.DELETE, pathPattern, handler);
     }
 
+    @Override
     public RoutingBuilder head(String pathPattern, HttpRequestHandler handler) {
         return withRoute(HttpMethod.HEAD, pathPattern, handler);
     }
 
+    @Override
     public RoutingBuilder options(String pathPattern, HttpRequestHandler handler) {
         return withRoute(HttpMethod.OPTIONS, pathPattern, handler);
     }
 
+    @Override
     public RoutingBuilder patch(String pathPattern, HttpRequestHandler handler) {
         return withRoute(HttpMethod.PATCH, pathPattern, handler);
     }
 
-    public Router build() {
-        return new Router(routeList);
+    public List<Route> getRoutesForMethod(HttpMethod method) {
+        return routingTable.getOrDefault(method, emptyList());
     }
 }

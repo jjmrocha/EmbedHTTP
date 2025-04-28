@@ -1,6 +1,5 @@
 package net.uiqui.embedhttp;
 
-import net.uiqui.embedhttp.routing.Router;
 import net.uiqui.embedhttp.server.ServerInstance;
 
 import static java.util.Objects.requireNonNull;

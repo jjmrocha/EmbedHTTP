@@ -1,0 +1,74 @@
+package net.uiqui.embedhttp.api.impl;
+
+import net.uiqui.embedhttp.Router;
+import net.uiqui.embedhttp.api.HttpMethod;
+import net.uiqui.embedhttp.api.HttpRequestHandler;
+import net.uiqui.embedhttp.server.Request;
+import org.junit.jupiter.api.Test;
+
+import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class RouterImplTest {
+    @Test
+    void testRouteRequestWithGetMethod() {
+        // given
+        var classUnderTest = buildRouterImpl();
+        var request = new Request(HttpMethod.GET, "/get?name=value", emptyMap(), null);
+        // when
+        var result = classUnderTest.routeRequest(request);
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.route().getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(result.route().getPathPattern()).isEqualTo("/get");
+        assertThat(result.request()).isEqualTo(request);
+    }
+
+    @Test
+    void testRouteRequestWithPutMethodAndPathParameter() {
+        // given
+        var classUnderTest = buildRouterImpl();
+        var request = new Request(HttpMethod.PUT, "/put/123", emptyMap(), null);
+        // when
+        var result = classUnderTest.routeRequest(request);
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.route().getMethod()).isEqualTo(HttpMethod.PUT);
+        assertThat(result.route().getPathPattern()).isEqualTo("/put/:id");
+        assertThat(result.request()).isEqualTo(request);
+        assertThat(result.pathParameters()).containsEntry("id", "123");
+    }
+
+    @Test
+    void testRouteRequestWithPostMethod() {
+        // given
+        var classUnderTest = buildRouterImpl();
+        var request = new Request(HttpMethod.POST, "/post", emptyMap(), null);
+        // when
+        var result = classUnderTest.routeRequest(request);
+        // then
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void testRouteRequestWithPutMethodAndNoPathParameter() {
+        // given
+        var classUnderTest = buildRouterImpl();
+        var request = new Request(HttpMethod.PUT, "/put", emptyMap(), null);
+        // when
+        var result = classUnderTest.routeRequest(request);
+        // then
+        assertThat(result).isNull();
+    }
+
+    private static RouterImpl buildRouterImpl() {
+        HttpRequestHandler handler = (x, y) -> {
+        };
+        Router router = Router.newRouter()
+                .get("/get", handler)
+                .put("/put/:id", handler);
+
+        assertThat(router).isInstanceOf(RouterImpl.class);
+        return (RouterImpl) router;
+    }
+}

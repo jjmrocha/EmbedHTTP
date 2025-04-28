@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp;
+package net.uiqui.embedhttp.api;
 
 public enum ContentType {
     TEXT_PLAIN("text/plain"),

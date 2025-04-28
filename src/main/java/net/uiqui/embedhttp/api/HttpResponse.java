@@ -1,7 +1,5 @@
 package net.uiqui.embedhttp.api;
 
-import net.uiqui.embedhttp.ContentType;
-
 /**
  * Class representing an HTTP response.
  * Contains details such as the status code, headers, and body.

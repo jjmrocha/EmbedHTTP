@@ -1,6 +1,6 @@
 package net.uiqui.embedhttp.api.impl;
 
-import net.uiqui.embedhttp.ContentType;
+import net.uiqui.embedhttp.api.ContentType;
 import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.api.HttpStatusCode;
