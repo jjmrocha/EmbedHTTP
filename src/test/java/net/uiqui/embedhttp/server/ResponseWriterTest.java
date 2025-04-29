@@ -49,8 +49,7 @@ class ResponseWriterTest {
     }
 
     private HttpResponseImpl buildResponse(HttpStatusCode status, String body) {
-        var response = new HttpResponseImpl();
-        response.setStatus(status);
+        var response = new HttpResponseImpl(status);
 
         if (body != null) {
             response.setBody(ContentType.TEXT_PLAIN, body);

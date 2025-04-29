@@ -1,5 +1,6 @@
 package net.uiqui.embedhttp.api.impl;
 
+import net.uiqui.embedhttp.api.ContentType;
 import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpStatusCode;
 import org.junit.jupiter.api.Test;
@@ -17,10 +18,8 @@ class HttpResponseImplTest {
     @ParameterizedTest
     @MethodSource("statusCodes")
     void testSetStatusWithHttpStatusCode(HttpStatusCode statusCode, int code, String message) {
-        // given
-        var classUnderTest = new HttpResponseImpl();
         // when
-        classUnderTest.setStatus(statusCode);
+        var classUnderTest = new HttpResponseImpl(statusCode);
         // then
         assertThat(classUnderTest.getStatusCode()).isEqualTo(code);
         assertThat(classUnderTest.getStatusMessage()).isEqualTo(message);
@@ -29,11 +28,10 @@ class HttpResponseImplTest {
     @Test
     void testSetStatus() {
         // given
-        var classUnderTest = new HttpResponseImpl();
         var statusCode = 404;
         var statusMessage = "Not Found";
         // when
-        classUnderTest.setStatus(statusCode, statusMessage);
+        var classUnderTest = new HttpResponseImpl(statusCode, statusMessage);
         // then
         assertThat(classUnderTest.getStatusCode()).isEqualTo(404);
         assertThat(classUnderTest.getStatusMessage()).isEqualTo("Not Found");
@@ -43,7 +41,7 @@ class HttpResponseImplTest {
     @MethodSource("herders")
     void testSetHeaderWithHttpHeader(HttpHeader header, String value) {
         // given
-        var classUnderTest = new HttpResponseImpl();
+        var classUnderTest = new HttpResponseImpl(HttpStatusCode.OK);
         // when
         classUnderTest.setHeader(header, value + " value");
         // then
@@ -53,7 +51,7 @@ class HttpResponseImplTest {
     @Test
     void testSetHeader() {
         // given
-        var classUnderTest = new HttpResponseImpl();
+        var classUnderTest = new HttpResponseImpl(HttpStatusCode.OK);
         var headerName = "X-Custom-Header";
         var headerValue = "CustomValue";
         // when
@@ -63,25 +61,30 @@ class HttpResponseImplTest {
     }
 
     @Test
-    void testSetContentType() {
+    void testSetBodyWithContentType() {
         // given
-        var classUnderTest = new HttpResponseImpl();
-        var contentType = "application/json";
+        var classUnderTest = new HttpResponseImpl(HttpStatusCode.OK);
+        var contentType = ContentType.APPLICATION_JSON;
+        var body = "{\"key\": \"value\"}";
         // when
-        classUnderTest.setContentType(contentType);
+        classUnderTest.setBody(contentType, body);
         // then
-        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_TYPE.getValue(), contentType);
+        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_TYPE.getValue(), contentType.getValue());
+        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_LENGTH.getValue(), "16");
+        assertThat(classUnderTest.getBody()).isEqualTo(body);
     }
 
     @Test
     void testSetBody() {
         // given
-        var classUnderTest = new HttpResponseImpl();
-        var body = "Hello, World!";
+        var classUnderTest = new HttpResponseImpl(HttpStatusCode.OK);
+        var contentType = "application/json";
+        var body = "{\"key\": \"value\"}";
         // when
-        classUnderTest.setBody(body);
+        classUnderTest.setBody(contentType, body);
         // then
-        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_LENGTH.getValue(), String.valueOf(body.length()));
+        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_TYPE.getValue(), contentType);
+        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_LENGTH.getValue(), "16");
         assertThat(classUnderTest.getBody()).isEqualTo(body);
     }
 

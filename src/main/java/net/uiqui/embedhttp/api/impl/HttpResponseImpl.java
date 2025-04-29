@@ -10,63 +10,46 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HttpResponseImpl implements HttpResponse {
-    private int statusCode = 200;
-    private String statusMessage = "OK";
+    private final int statusCode;
+    private final String statusMessage;
     private final Map<String, String> headers = new HashMap<>();
-    private String body;
+    private String body = null;
 
-    @Override
-    public void setStatus(HttpStatusCode statusCode) {
-        Objects.requireNonNull(statusCode, "Status code cannot be null");
-        setStatus(statusCode.getCode(), statusCode.getReasonPhrase());
+    public HttpResponseImpl(HttpStatusCode statusCode) {
+        this(statusCode.getCode(), statusCode.getReasonPhrase());
     }
 
-    @Override
-    public void setStatus(int statusCode, String statusMessage) {
-        Objects.requireNonNull(statusMessage, "Status message cannot be null");
+    public HttpResponseImpl(int statusCode, String statusMessage) {
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
     }
 
     @Override
-    public void setHeader(HttpHeader name, String value) {
-        Objects.requireNonNull(name, "Header name cannot be null");
-        Objects.requireNonNull(value, "Header value cannot be null");
-        setHeader(name.getValue(), value);
+    public HttpResponse setHeader(HttpHeader name, String value) {
+        return setHeader(name.getValue(), value);
     }
 
     @Override
-    public void setHeader(String name, String value) {
+    public HttpResponse setHeader(String name, String value) {
         Objects.requireNonNull(name, "Header name cannot be null");
         Objects.requireNonNull(value, "Header value cannot be null");
         headers.put(name, value);
+        return this;
     }
 
     @Override
-    public void setContentType(ContentType contentType) {
-        Objects.requireNonNull(contentType, "Content-Type cannot be null");
-        setContentType(contentType.getValue());
+    public HttpResponse setBody(ContentType contentType, String body) {
+        return setBody(contentType.getValue(), body);
     }
 
     @Override
-    public void setContentType(String contentType) {
+    public HttpResponse setBody(String contentType, String body) {
         Objects.requireNonNull(contentType, "Content-Type cannot be null");
+        Objects.requireNonNull(body, "Body cannot be null");
         setHeader(HttpHeader.CONTENT_TYPE, contentType);
-    }
-
-    @Override
-    public void setBody(ContentType contentType, String body) {
-        Objects.requireNonNull(contentType, "Content-Type cannot be null");
-        Objects.requireNonNull(body, "Body cannot be null");
-        setContentType(contentType);
-        setBody(body);
-    }
-
-    @Override
-    public void setBody(String body) {
-        Objects.requireNonNull(body, "Body cannot be null");
         setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(body.length()));
         this.body = body;
+        return this;
     }
 
     public int getStatusCode() {
