@@ -10,7 +10,7 @@ public class ResponseWriter {
     public static final String HTTP_VERSION_1_1 = "HTTP/1.1";
     public static final String CRLF = "\r\n";
 
-    public static void writeResponse(OutputStream outputStream, HttpResponseImpl response) throws IOException {
+    public void writeResponse(OutputStream outputStream, HttpResponseImpl response) throws IOException {
         var builder = new StringBuilder();
 
         // Write the HTTP response line

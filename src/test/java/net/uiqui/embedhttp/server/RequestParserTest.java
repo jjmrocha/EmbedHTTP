@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
 class RequestParserTest {
+    private final RequestParser classUnderTest = new RequestParser();
 
     @Test
     void testParseValidRequestWithoutBody() throws Exception {
@@ -23,7 +24,7 @@ class RequestParserTest {
                 """;
         var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
         // when
-        var result = RequestParser.parseRequest(inputStream);
+        var result = classUnderTest.parseRequest(inputStream);
         // then
         assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(result.getUrl()).isEqualTo("/test");
@@ -43,7 +44,7 @@ class RequestParserTest {
                 Hello World""";
         var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
         // when
-        var result = RequestParser.parseRequest(inputStream);
+        var result = classUnderTest.parseRequest(inputStream);
         // then
         assertThat(result.getMethod()).isEqualTo(HttpMethod.POST);
         assertThat(result.getUrl()).isEqualTo("/submit");
@@ -69,7 +70,7 @@ class RequestParserTest {
                 """;
         var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
         // when
-        var result = RequestParser.parseRequest(inputStream);
+        var result = classUnderTest.parseRequest(inputStream);
         // then
         assertThat(result.getMethod()).isEqualTo(HttpMethod.POST);
         assertThat(result.getUrl()).isEqualTo("/upload");
@@ -85,7 +86,7 @@ class RequestParserTest {
         var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
         // when
         var result = catchThrowable(() ->
-                RequestParser.parseRequest(inputStream)
+                classUnderTest.parseRequest(inputStream)
         );
         // then
         assertThat(result).isInstanceOf(IOException.class);
@@ -102,7 +103,7 @@ class RequestParserTest {
         var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
         // when
         var result = catchThrowable(() ->
-                RequestParser.parseRequest(inputStream)
+                classUnderTest.parseRequest(inputStream)
         );
         // then
         assertThat(result).isInstanceOf(IOException.class);

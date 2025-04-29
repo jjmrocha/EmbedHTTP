@@ -11,6 +11,7 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ResponseWriterTest {
+    private final ResponseWriter classUnderTest = new ResponseWriter();
 
     @Test
     void testWriteResponseWithoutBody() throws IOException {
@@ -18,7 +19,7 @@ class ResponseWriterTest {
         var response = buildResponse(HttpStatusCode.NO_CONTENT, null);
         var outputStream = new ByteArrayOutputStream();
         // when
-        ResponseWriter.writeResponse(outputStream, response);
+        classUnderTest.writeResponse(outputStream, response);
         // then
         var expected = """
                 HTTP/1.1 204 No Content\r
@@ -35,7 +36,7 @@ class ResponseWriterTest {
         var response = buildResponse(HttpStatusCode.OK, "Hello World");
         var outputStream = new ByteArrayOutputStream();
         // when
-        ResponseWriter.writeResponse(outputStream, response);
+        classUnderTest.writeResponse(outputStream, response);
         // then
         var expected = """
                 HTTP/1.1 200 OK\r

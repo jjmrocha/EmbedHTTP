@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ProtocolException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +15,8 @@ import java.util.Map;
 public class RequestParser {
     private static final String TRANSFER_ENCODING_CHUNKED = "chunked";
 
-    public static Request parseRequest(InputStream inputStream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+    public Request parseRequest(InputStream inputStream) throws IOException {
+        try (var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             var requestLine = decodeRequestLine(reader);
             var headers = decodeRequestHeaders(reader);
             var body = decodeRequestBody(reader, headers);
@@ -24,21 +25,21 @@ public class RequestParser {
         }
     }
 
-    private static RequestLine decodeRequestLine(BufferedReader reader) throws IOException {
+    private RequestLine decodeRequestLine(BufferedReader reader) throws IOException {
         var line = reader.readLine();
 
         if (line == null || line.isEmpty()) {
-            throw new IOException("Invalid request line: line is null or empty");
+            throw new ProtocolException("Invalid request line: line is null or empty");
         }
 
         var parts = line.split(" ");
         if (parts.length != 3) {
-            throw new IOException("Invalid request line: " + line);
+            throw new ProtocolException("Invalid request line: " + line);
         }
 
         var method = HttpMethod.fromString(parts[0]);
         if (method == null) {
-            throw new IOException("Invalid HTTP method: " + parts[0]);
+            throw new ProtocolException("Invalid HTTP method: " + parts[0]);
         }
 
         var url = parts[1];
@@ -46,14 +47,14 @@ public class RequestParser {
         return new RequestLine(method, url, version);
     }
 
-    private static Map<String, String> decodeRequestHeaders(BufferedReader reader) throws IOException {
+    private Map<String, String> decodeRequestHeaders(BufferedReader reader) throws IOException {
         var headers = new HashMap<String, String>();
         String line;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             var colonIndex = line.indexOf(":");
             if (colonIndex == -1) {
-                throw new IOException("Invalid header line: " + line);
+                throw new ProtocolException("Invalid header line: " + line);
             }
 
             var headerName = line.substring(0, colonIndex).trim();
@@ -64,7 +65,7 @@ public class RequestParser {
         return headers;
     }
 
-    private static String decodeRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+    private String decodeRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
         if (headers.containsKey(HttpHeader.CONTENT_LENGTH.getValue())) {
             var contentLength = Integer.parseInt(headers.get(HttpHeader.CONTENT_LENGTH.getValue()));
             return readFixedSizeBodyChunk(reader, contentLength);
@@ -77,7 +78,7 @@ public class RequestParser {
         return ""; // No body or unsupported format
     }
 
-    private static String readChunkedBody(BufferedReader reader) throws IOException {
+    private String readChunkedBody(BufferedReader reader) throws IOException {
         var body = new StringBuilder();
 
         while (true) {
@@ -94,23 +95,23 @@ public class RequestParser {
         return body.toString();
     }
 
-    private static int readChunkSize(BufferedReader reader) throws IOException {
+    private int readChunkSize(BufferedReader reader) throws IOException {
         var line = reader.readLine();
         if (line == null) {
-            throw new IOException("Unexpected end of stream while reading chunk size");
+            throw new ProtocolException("Unexpected end of stream while reading chunk size");
         }
 
         return Integer.parseInt(line.trim(), 16);
     }
 
-    private static String readFixedSizeBodyChunk(BufferedReader reader, int chunkSize) throws IOException {
+    private String readFixedSizeBodyChunk(BufferedReader reader, int chunkSize) throws IOException {
         var chunk = new char[chunkSize];
         int read = 0;
 
         while (read < chunkSize) {
             var readCount = reader.read(chunk, read, chunkSize - read);
             if (readCount == -1) {
-                throw new IOException("Unexpected end of stream while reading body");
+                throw new ProtocolException("Unexpected end of stream while reading body");
             }
 
             read += readCount;
@@ -119,10 +120,10 @@ public class RequestParser {
         return new String(chunk);
     }
 
-    private static void consumeTrailingLine(BufferedReader reader) throws IOException {
+    private void consumeTrailingLine(BufferedReader reader) throws IOException {
         var line = reader.readLine();
         if (line == null) {
-            throw new IOException("Unexpected end of stream while consuming trailing line");
+            throw new ProtocolException("Unexpected end of stream while consuming trailing line");
         }
     }
 
