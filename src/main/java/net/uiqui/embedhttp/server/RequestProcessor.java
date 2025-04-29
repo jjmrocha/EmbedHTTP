@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ProtocolException;
 import java.net.Socket;
+import java.util.function.Function;
 
 public class RequestProcessor {
     private final RequestParser requestParser;
@@ -24,51 +25,42 @@ public class RequestProcessor {
     }
 
     public void process(Socket clientSocket) throws IOException {
-        var chainedRequest = parse(clientSocket.getInputStream());
-        var chainedHttpRequest = route(chainedRequest);
-        var response = execute(chainedHttpRequest);
-        write(response, clientSocket.getOutputStream());
+        try (clientSocket) {
+            var response = parse(clientSocket.getInputStream())
+                    .next(this::route)
+                    .then(this::execute);
+            write(response, clientSocket.getOutputStream());
+        }
     }
 
-
-    private ChainedValue<Request> parse(InputStream inputStream) throws IOException {
+    private BreakableSequence<Request> parse(InputStream inputStream) throws IOException {
         try {
             var request = requestParser.parseRequest(inputStream);
-            return new ChainedValue<>(request, null);
+            return new BreakableSequence<>(request, null);
         } catch (ProtocolException e) {
             var response = HttpResponse.badRequest(ContentType.TEXT_PLAIN, "Bad Request: " + e.getMessage());
-            return new ChainedValue<>(null, response);
+            return new BreakableSequence<>(null, response);
         }
     }
 
-    private ChainedValue<HttpRequestImpl> route(ChainedValue<Request> chainedRequest) {
-        if (chainedRequest.hasResponse()) {
-            return new ChainedValue<>(null, chainedRequest.response());
-        }
-
-        var request = chainedRequest.value;
+    private BreakableSequence<HttpRequestImpl> route(Request request) {
         var httpRequest = router.routeRequest(request);
 
         if (httpRequest == null) {
             var response = HttpResponse.notFound(ContentType.TEXT_PLAIN, "Not Found:" + request.getPath());
-            return new ChainedValue<>(null, response);
+            return new BreakableSequence<>(null, response);
         }
 
-        return new ChainedValue<>(httpRequest, null);
+        return new BreakableSequence<>(httpRequest, null);
     }
 
-    private HttpResponse execute(ChainedValue<HttpRequestImpl> chainedHttpRequest) {
-        if (chainedHttpRequest.hasResponse()) {
-            return chainedHttpRequest.response();
-        }
-
-        var handler = chainedHttpRequest.value.route().getHandler();
-        var httpRequest = chainedHttpRequest.value;
+    private HttpResponse execute(HttpRequestImpl httpRequest) {
+        var handler = httpRequest.route().getHandler();
 
         try {
             return handler.handle(httpRequest);
         } catch (Throwable e) {
-            return HttpResponse.unexpectedError(ContentType.TEXT_PLAIN, "Internal Server Error");
+            return HttpResponse.unexpectedError(ContentType.TEXT_PLAIN, "Unexpected error executing request");
         }
     }
 
@@ -77,9 +69,25 @@ public class RequestProcessor {
         responseWriter.writeResponse(outputStream, castedResponse);
     }
 
-    private record ChainedValue<T>(T value, HttpResponse response) {
+    private record BreakableSequence<T>(T value, HttpResponse response) {
         public boolean hasResponse() {
             return response != null;
+        }
+
+        public <R> BreakableSequence<R> next(Function<T, BreakableSequence<R>> mapper) {
+            if (hasResponse()) {
+                return new BreakableSequence<>(null, response);
+            }
+
+            return mapper.apply(value);
+        }
+
+        public HttpResponse then(Function<T, HttpResponse> mapper) {
+            if (hasResponse()) {
+                return response;
+            }
+
+            return mapper.apply(value);
         }
     }
 }

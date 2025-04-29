@@ -12,18 +12,19 @@ group = project.properties["GROUP"].toString()
 version = project.properties["VERSION_NAME"].toString()
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+	sourceCompatibility = JavaVersion.toVersion("21")
+	targetCompatibility = JavaVersion.toVersion("21")
 }
 
 repositories {
 	mavenCentral()
 }
 
+
 dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
 	testImplementation("org.assertj:assertj-core:3.27.3")
+	testImplementation("org.mockito:mockito-core:5.17.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

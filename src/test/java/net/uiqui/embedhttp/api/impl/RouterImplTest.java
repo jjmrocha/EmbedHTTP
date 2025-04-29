@@ -62,11 +62,28 @@ class RouterImplTest {
         assertThat(result).isNull();
     }
 
+    @Test
+    void testRouteRequestWithMultiplePathParameters() {
+        // given
+        var classUnderTest = buildRouterImpl();
+        var request = new Request(HttpMethod.POST, "/v1/resource/123/section/abc", emptyMap(), null);
+        // when
+        var result = classUnderTest.routeRequest(request);
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.route().getMethod()).isEqualTo(HttpMethod.POST);
+        assertThat(result.route().getPathPattern()).isEqualTo("/v1/resource/:id/section/:name");
+        assertThat(result.request()).isEqualTo(request);
+        assertThat(result.pathParameters()).containsEntry("id", "123");
+        assertThat(result.pathParameters()).containsEntry("name", "abc");
+    }
+
     private static RouterImpl buildRouterImpl() {
         HttpRequestHandler handler = (x) -> HttpResponse.noContent();
         var router = Router.newRouter()
                 .get("/get", handler)
-                .put("/put/:id", handler);
+                .put("/put/:id", handler)
+                .post("/v1/resource/:id/section/:name", handler);
 
         assertThat(router).isInstanceOf(RouterImpl.class);
         return (RouterImpl) router;
