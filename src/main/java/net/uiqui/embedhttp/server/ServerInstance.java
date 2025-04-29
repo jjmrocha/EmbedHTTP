@@ -1,15 +1,15 @@
 package net.uiqui.embedhttp.server;
 
 import net.uiqui.embedhttp.Router;
-import net.uiqui.embedhttp.server.status.Status;
-import net.uiqui.embedhttp.server.status.StatusHolder;
+import net.uiqui.embedhttp.server.state.ServerState;
+import net.uiqui.embedhttp.server.state.StateMachine;
 
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
 public class ServerInstance {
-    private final StatusHolder serverStatus = new StatusHolder(Status.STOPPED);
+    private final StateMachine stateMachine = new StateMachine(ServerState.STOPPED);
     private final int port;
     private final int backlog;
 
@@ -19,23 +19,23 @@ public class ServerInstance {
     }
 
     public boolean start(Router router) throws Exception {
-        if (serverStatus.getCurrentStatus() == Status.RUNNING) {
+        if (stateMachine.getCurrentState() == ServerState.RUNNING) {
             return true;
         }
 
-        if (serverStatus.getCurrentStatus() != Status.STOPPED) {
+        if (stateMachine.getCurrentState() != ServerState.STOPPED) {
             return false;
         }
 
-        if (!serverStatus.setStatus(Status.STARTING)) {
+        if (!stateMachine.setState(ServerState.STARTING)) {
             return false;
         }
 
         new Thread(() -> {
             try (ServerSocket serverSocket = new ServerSocket(port, backlog)) {
-                serverStatus.setStatus(Status.RUNNING);
+                stateMachine.setState(ServerState.RUNNING);
 
-                while (serverStatus.getCurrentStatus() == Status.RUNNING) {
+                while (stateMachine.getCurrentState() == ServerState.RUNNING) {
                     try {
                         Socket clientSocket = serverSocket.accept();
                         handleRequest(clientSocket, router);
@@ -46,12 +46,12 @@ public class ServerInstance {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                serverStatus.setStatus(Status.STOPPED);
+                stateMachine.setState(ServerState.STOPPED);
             }
         }).start();
 
-        var newstatus = serverStatus.waitForStatus(Status.RUNNING, Status.STOPPED);
-        return newstatus == Status.RUNNING;
+        var newState = stateMachine.waitForState(ServerState.RUNNING, ServerState.STOPPED);
+        return newState == ServerState.RUNNING;
     }
 
     private void handleRequest(Socket clientSocket, Router router) {
@@ -59,19 +59,19 @@ public class ServerInstance {
     }
 
     public boolean stop() throws InterruptedException {
-        if (serverStatus.getCurrentStatus() == Status.STOPPED) {
+        if (stateMachine.getCurrentState() == ServerState.STOPPED) {
             return true;
         }
 
-        if (serverStatus.getCurrentStatus() != Status.RUNNING) {
+        if (stateMachine.getCurrentState() != ServerState.RUNNING) {
             return false;
         }
 
-        if (!serverStatus.setStatus(Status.STOPPING)) {
+        if (!stateMachine.setState(ServerState.STOPPING)) {
             return false;
         }
 
-        serverStatus.waitForStatus(Status.STOPPED);
+        stateMachine.waitForState(ServerState.STOPPED);
         return true;
     }
 }

@@ -31,7 +31,7 @@ public record HttpRequestImpl(Request request, Route route, Map<String, String> 
         var queryParameters = new HashMap<String, String>();
         var queryParts = request.getQuery().split("&");
 
-        for (String part : queryParts) {
+        for (var part : queryParts) {
             var keyValue = part.split("=");
 
             if (keyValue.length == 2) {
