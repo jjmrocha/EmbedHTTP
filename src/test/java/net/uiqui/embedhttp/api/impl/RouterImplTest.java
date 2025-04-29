@@ -3,6 +3,7 @@ package net.uiqui.embedhttp.api.impl;
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
+import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.server.Request;
 import org.junit.jupiter.api.Test;
 
@@ -62,9 +63,8 @@ class RouterImplTest {
     }
 
     private static RouterImpl buildRouterImpl() {
-        HttpRequestHandler handler = (x, y) -> {
-        };
-        Router router = Router.newRouter()
+        HttpRequestHandler handler = (x) -> HttpResponse.noContent();
+        var router = Router.newRouter()
                 .get("/get", handler)
                 .put("/put/:id", handler);
 

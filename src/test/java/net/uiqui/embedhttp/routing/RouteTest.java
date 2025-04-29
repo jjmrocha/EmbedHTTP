@@ -2,6 +2,7 @@ package net.uiqui.embedhttp.routing;
 
 import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
+import net.uiqui.embedhttp.api.HttpResponse;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,8 +17,7 @@ class RouteTest {
     @MethodSource("pathRequests")
     void testBuilder(String path, Pattern regex) {
         // given
-        HttpRequestHandler handler = (req, res) -> {
-        };
+        HttpRequestHandler handler = (req) -> HttpResponse.noContent();
         // when
         var result = new Route(HttpMethod.GET, path, handler);
         // then

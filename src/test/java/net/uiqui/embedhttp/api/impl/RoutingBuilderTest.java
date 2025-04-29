@@ -3,6 +3,7 @@ package net.uiqui.embedhttp.api.impl;
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
+import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.routing.Route;
 import org.junit.jupiter.api.Test;
 
@@ -12,8 +13,7 @@ class RoutingBuilderTest {
     @Test
     void testNewRouter() {
         // given
-        HttpRequestHandler handler = (request, response) -> {
-        };
+        HttpRequestHandler handler = (request) -> HttpResponse.noContent();
         // when
         var result = Router.newRouter()
                 .get("/get", handler)
