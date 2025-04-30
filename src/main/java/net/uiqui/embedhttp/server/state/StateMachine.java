@@ -1,11 +1,12 @@
 package net.uiqui.embedhttp.server.state;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static java.util.Collections.emptySet;
 
 public class StateMachine {
     private static final Map<ServerState, Set<ServerState>> VALID_STATE_CHANGE = Map.of(
@@ -64,8 +65,8 @@ public class StateMachine {
         }
     }
 
-    protected boolean isValidStateChange(ServerState starting, ServerState newServerState) {
-        var validState = VALID_STATE_CHANGE.getOrDefault(starting, Collections.emptySet());
+    protected boolean isValidStateChange(ServerState currentServerState, ServerState newServerState) {
+        var validState = VALID_STATE_CHANGE.getOrDefault(currentServerState, emptySet());
         return validState.contains(newServerState);
     }
 }
