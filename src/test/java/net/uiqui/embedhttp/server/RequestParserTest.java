@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.ProtocolException;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,7 +90,7 @@ class RequestParserTest {
                 classUnderTest.parseRequest(inputStream)
         );
         // then
-        assertThat(result).isInstanceOf(IOException.class);
+        assertThat(result).isInstanceOf(ProtocolException.class);
     }
 
     @Test
@@ -106,6 +107,6 @@ class RequestParserTest {
                 classUnderTest.parseRequest(inputStream)
         );
         // then
-        assertThat(result).isInstanceOf(IOException.class);
+        assertThat(result).isInstanceOf(ProtocolException.class);
     }
 }
