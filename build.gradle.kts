@@ -20,26 +20,33 @@ repositories {
 	mavenCentral()
 }
 
+val mockitoAgent = configurations.create("mockitoAgent")
 
 dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
 	testImplementation("org.assertj:assertj-core:3.27.3")
 	testImplementation("org.mockito:mockito-core:5.17.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	mockitoAgent("org.mockito:mockito-core:5.17.0") { isTransitive = false }
 }
 
-tasks.withType<Test> {
-	useJUnitPlatform()
-	testLogging {
-		events(
-			FAILED,
-			STANDARD_ERROR,
-			SKIPPED,
-			PASSED
-		)
-		exceptionFormat = FULL
-		showExceptions = true
-		showCauses = true
-		showStackTraces = true
+tasks {
+	test {
+		jvmArgs("-javaagent:${mockitoAgent.singleFile.absolutePath}")
+
+		useJUnitPlatform()
+		testLogging {
+			events(
+				FAILED,
+				STANDARD_ERROR,
+				SKIPPED,
+				PASSED
+			)
+			exceptionFormat = FULL
+			showExceptions = true
+			showCauses = true
+			showStackTraces = true
+		}
 	}
 }
+
