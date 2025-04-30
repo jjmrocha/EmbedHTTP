@@ -24,24 +24,35 @@ Below is an example of how to use EmbedHTTP to expose a liveness probe and a met
 ```java
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.ContentType;
+import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpResponse;
+import net.uiqui.embedhttp.api.HttpStatusCode;
+
+import java.net.http.HttpHeaders;
 
 public class ExampleRoutes {
     public static Router createRouter() {
         return Router.newRouter()
-            .get("/resource/:id", request -> {
-                var id = request.getPathParam("id");
-                var response = "Resource ID: " + id;
-                return HttpResponse.ok(ContentType.TEXT_PLAIN, response);
-            })
-            .get("/health", request -> {
-                // Simulate a health check
-                return HttpResponse.ok(ContentType.TEXT_PLAIN, "OK");
-            })
-            .get("/metrics", request -> {
-                var metrics = "metric_name 123";
-                return HttpResponse.ok(ContentType.TEXT_PLAIN, metrics);
-            });
+                .put("/resource/:id", request -> {
+                    var id = request.getPathParam("id");
+                    var name = request.getQueryParam("name");
+                    if (name == null || name.isEmpty()) {
+                        return HttpResponse.badRequest(ContentType.TEXT_PLAIN, "Name parameter is required.");
+                    }
+                    // Add to queue for resource update logic
+                    var response = "Resource " + id + " name's will be updated to " + name + ".";
+                    return HttpResponse.withStatus(HttpStatusCode.ACCEPTED)
+                            .setBody(ContentType.TEXT_PLAIN, response)
+                            .setHeader(HttpHeader.CACHE_CONTROL, "no-cache");
+                })
+                .get("/health", request -> {
+                    // Check system health
+                    return HttpResponse.ok(ContentType.TEXT_PLAIN, "OK");
+                })
+                .get("/metrics", request -> {
+                    var metrics = "metric_name 123";
+                    return HttpResponse.ok(ContentType.TEXT_PLAIN, metrics);
+                });
     }
 }
 ```
@@ -69,6 +80,9 @@ public class Main {
 Once the server is running, you can access the endpoints using a web browser or tools like `curl`:
 
 ```bash
+# put request to update a resource
+curl -X PUT http://localhost:8080/resource/123?name=test
+# Output: Resource 123 name's will be updated to test.
 curl http://localhost:8080/health
 # Output: OK
 curl http://localhost:8080/metrics
