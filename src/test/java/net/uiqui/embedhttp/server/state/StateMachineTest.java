@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ServerStateHolderTest {
+public class StateMachineTest {
     @ParameterizedTest
     @MethodSource("statusCombinations")
     public void testIsValidStatusChange(ServerState currentServerState, ServerState newServerState, boolean expected) {
