@@ -16,13 +16,13 @@ public class RequestParser {
     private static final String TRANSFER_ENCODING_CHUNKED = "chunked";
 
     public Request parseRequest(InputStream inputStream) throws IOException {
-        try (var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            var requestLine = decodeRequestLine(reader);
-            var headers = decodeRequestHeaders(reader);
-            var body = decodeRequestBody(reader, headers);
+        var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        var requestLine = decodeRequestLine(reader);
+        var headers = decodeRequestHeaders(reader);
+        var body = decodeRequestBody(reader, headers);
 
-            return new Request(requestLine.method(), requestLine.url(), headers, body);
-        }
+        return new Request(requestLine.method(), requestLine.url(), headers, body);
+
     }
 
     private RequestLine decodeRequestLine(BufferedReader reader) throws IOException {
