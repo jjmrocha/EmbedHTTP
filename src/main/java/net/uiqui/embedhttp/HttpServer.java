@@ -2,36 +2,54 @@ package net.uiqui.embedhttp;
 
 import net.uiqui.embedhttp.server.ServerInstance;
 
-import static java.util.Objects.requireNonNull;
+/**
+ * Interface for an HTTP server.
+ * <p>
+ * This interface defines the methods required to start and stop an HTTP server, as well as to retrieve the port on which
+ * the server is running.
+ * </p>
+ */
+public interface HttpServer {
+    static final int DEFAULT_BACKLOG = 100;
 
-public class HttpServer {
-    private static final int DEFAULT_PORT = 0;
-    private static final int DEFAULT_BACKLOG = 10;
+    /**
+     * Starts the HTTP server with the specified router.
+     *
+     * @param router The router to handle incoming requests.
+     * @return true if the server started successfully, false otherwise.
+     * @throws Exception If an error occurs while starting the server.
+     */
+    boolean start(Router router) throws Exception;
 
-    private final ServerInstance serverInstance;
+    /**
+     * Stops the HTTP server.
+     *
+     * @return true if the server stopped successfully, false otherwise.
+     * @throws Exception If an error occurs while stopping the server.
+     */
+    boolean stop() throws Exception;
 
-    public HttpServer() {
-        this(DEFAULT_PORT, DEFAULT_BACKLOG);
-    }
+    /**
+     * Retrieves the port on which the server is running.
+     *
+     * @return The port number.
+     */
+    int getInstancePort();
 
-    public HttpServer(int port, int backlog) {
-        serverInstance = new ServerInstance(port, backlog);
-    }
+    /**
+     * Checks if the server is currently running.
+     *
+     * @return true if the server is running, false otherwise.
+     */
+    boolean isRunning();
 
-    public boolean start(Router router) {
-        requireNonNull(router, "Router cannot be null");
-        try {
-            return serverInstance.start(router);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public boolean stop() {
-        try {
-            return serverInstance.stop();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    /**
+     * Creates a new instance of the HTTP server with the specified port and default backlog.
+     *
+     * @param port The port on which the server will listen for incoming connections.
+     * @return A new instance of the HTTP server.
+     */
+    static HttpServer newInstance(int port) {
+        return new ServerInstance(port, DEFAULT_BACKLOG);
     }
 }

@@ -25,6 +25,7 @@ class ServerInstanceTest {
         var response = callEndpoint(url);
         // then
         assertThat(result).isEqualTo(true);
+        assertThat(classUnderTest.isRunning()).isEqualTo(true);
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).isEqualTo("Hello World");
     }
@@ -41,6 +42,7 @@ class ServerInstanceTest {
         var response = callEndpoint(url);
         // then
         assertThat(result).isEqualTo(true);
+        assertThat(classUnderTest.isRunning()).isEqualTo(true);
         assertThat(classUnderTest.getInstancePort()).isEqualTo(9876);
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).isEqualTo("Hello World");
@@ -61,6 +63,7 @@ class ServerInstanceTest {
         );
         // then
         assertThat(result).isEqualTo(true);
+        assertThat(classUnderTest.isRunning()).isEqualTo(false);
         assertThat(response).isInstanceOf(ConnectException.class);
         assertThat(classUnderTest.getInstancePort()).isEqualTo(-1);
     }

@@ -1,5 +1,6 @@
 package net.uiqui.embedhttp.server;
 
+import net.uiqui.embedhttp.HttpServer;
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.impl.RouterImpl;
 import net.uiqui.embedhttp.server.state.ServerState;
@@ -13,14 +14,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ServerInstance {
+public class ServerInstance implements HttpServer {
     private static final Logger logger = Logger.getLogger(ServerInstance.class.getName());
     public static final int SO_TIMEOUT = 1000;
 
     private final StateMachine stateMachine = new StateMachine(ServerState.STOPPED);
+    private final AtomicInteger instancePort = new AtomicInteger(-1);
     private final int port;
     private final int backlog;
-    private final AtomicInteger instancePort = new AtomicInteger(-1);
 
     public ServerInstance(int port, int backlog) {
         this.port = port;
@@ -108,6 +109,10 @@ public class ServerInstance {
         logger.log(Level.INFO, "Server(" + port + ") stopped");
 
         return true;
+    }
+
+    public boolean isRunning() {
+        return stateMachine.getCurrentState() == ServerState.RUNNING;
     }
 
     public int getInstancePort() {
