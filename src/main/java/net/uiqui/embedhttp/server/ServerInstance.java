@@ -6,6 +6,7 @@ import net.uiqui.embedhttp.api.impl.RouterImpl;
 import net.uiqui.embedhttp.server.state.ServerState;
 import net.uiqui.embedhttp.server.state.StateMachine;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -30,17 +31,17 @@ public class ServerInstance implements HttpServer {
 
     public boolean start(Router router) throws InterruptedException {
         if (stateMachine.getCurrentState() == ServerState.RUNNING) {
-            logger.log(Level.FINER, "Server(" + port + ") is already running");
+            logger.log(Level.FINER, () -> serverLogMessage("Already running"));
             return true;
         }
 
         if (stateMachine.getCurrentState() != ServerState.STOPPED) {
-            logger.log(Level.WARNING, "Server(" + port + ") is not stopped");
+            logger.log(Level.WARNING, () -> serverLogMessage("Is not stopped"));
             return false;
         }
 
         if (!stateMachine.setState(ServerState.STARTING)) {
-            logger.log(Level.WARNING, "Server(" + port + ") can't be started");
+            logger.log(Level.WARNING, () -> serverLogMessage("Can''t be started"));
             return false;
         }
 
@@ -54,28 +55,32 @@ public class ServerInstance implements HttpServer {
                 var requestProcessor = new RequestProcessor(requestParser, responseWriter, (RouterImpl) router);
 
                 stateMachine.setState(ServerState.RUNNING);
-                logger.log(Level.INFO, "Server(" + port + ") started on port " + serverSocket.getLocalPort());
+                logger.log(Level.INFO, () -> serverLogMessage("Started on port " + serverSocket.getLocalPort()));
 
                 while (stateMachine.getCurrentState() == ServerState.RUNNING) {
-                    try {
-                        var clientSocket = serverSocket.accept();
-                        handleRequest(clientSocket, requestProcessor);
-                    } catch (SocketTimeoutException e) {
-                        // Ignore timeout exception
-                    } catch (SocketException e) {
-                        logger.log(Level.SEVERE, "Server(" + port + "): Error accepting client requests", e);
-                    }
+                    acceptAndProcess(serverSocket, requestProcessor);
                 }
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Server(" + port + "): Error starting server", e);
+                logger.log(Level.SEVERE, e, () -> serverLogMessage("Error starting server"));
             } finally {
                 stateMachine.setState(ServerState.STOPPED);
             }
         });
 
-        logger.log(Level.FINER, "Waiting for server(" + port + ") to start");
+        logger.log(Level.FINER, () -> serverLogMessage("Waiting for server to start"));
         var newState = stateMachine.waitForState(ServerState.RUNNING, ServerState.STOPPED);
         return newState == ServerState.RUNNING;
+    }
+
+    private void acceptAndProcess(ServerSocket serverSocket, RequestProcessor requestProcessor) throws IOException {
+        try {
+            var clientSocket = serverSocket.accept();
+            handleRequest(clientSocket, requestProcessor);
+        } catch (SocketTimeoutException e) {
+            // Ignore timeout exception
+        } catch (SocketException e) {
+            logger.log(Level.SEVERE, e, () -> serverLogMessage("Error accepting client requests"));
+        }
     }
 
     private void handleRequest(Socket clientSocket, RequestProcessor requestProcessor) {
@@ -83,30 +88,30 @@ public class ServerInstance implements HttpServer {
             try {
                 requestProcessor.process(clientSocket);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Server(" + port + "): Error processing request", e);
+                logger.log(Level.SEVERE, e, () -> serverLogMessage("Error processing request"));
             }
         });
     }
 
     public boolean stop() throws InterruptedException {
         if (stateMachine.getCurrentState() == ServerState.STOPPED) {
-            logger.log(Level.FINER, "Server(" + port + ") is already stopped");
+            logger.log(Level.FINER, () -> serverLogMessage("Is already stopped"));
             return true;
         }
 
         if (stateMachine.getCurrentState() != ServerState.RUNNING) {
-            logger.log(Level.WARNING, "Server(" + port + ") is not running");
+            logger.log(Level.WARNING, () -> serverLogMessage("Is not running"));
             return false;
         }
 
         if (!stateMachine.setState(ServerState.STOPPING)) {
-            logger.log(Level.WARNING, "Server(" + port + ") can't be stopped");
+            logger.log(Level.WARNING, () -> serverLogMessage("Can''t be stopped"));
             return false;
         }
 
-        logger.log(Level.FINER, "Waiting for server(" + port + ") to stop");
+        logger.log(Level.FINER, () -> serverLogMessage("Waiting for server to stop"));
         stateMachine.waitForState(ServerState.STOPPED);
-        logger.log(Level.INFO, "Server(" + port + ") stopped");
+        logger.log(Level.INFO, () -> serverLogMessage("Stopped"));
 
         return true;
     }
@@ -121,5 +126,9 @@ public class ServerInstance implements HttpServer {
         }
 
         return instancePort.get();
+    }
+
+    private String serverLogMessage(String message) {
+        return String.format("Server(%d): %s", port, message);
     }
 }

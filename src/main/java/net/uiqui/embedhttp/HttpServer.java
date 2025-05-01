@@ -17,17 +17,17 @@ public interface HttpServer {
      *
      * @param router The router to handle incoming requests.
      * @return true if the server started successfully, false otherwise.
-     * @throws Exception If an error occurs while starting the server.
+     * @throws InterruptedException If an error occurs while starting the server.
      */
-    boolean start(Router router) throws Exception;
+    boolean start(Router router) throws InterruptedException;
 
     /**
      * Stops the HTTP server.
      *
      * @return true if the server stopped successfully, false otherwise.
-     * @throws Exception If an error occurs while stopping the server.
+     * @throws InterruptedException If an error occurs while stopping the server.
      */
-    boolean stop() throws Exception;
+    boolean stop() throws InterruptedException;
 
     /**
      * Retrieves the port on which the server is running.

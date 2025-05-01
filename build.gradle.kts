@@ -22,12 +22,16 @@ repositories {
 
 val mockitoAgent = configurations.create("mockitoAgent")
 
+var junitVersion = "5.12.1"
+var assertjVersion = "3.27.3"
+var mockitoVersion = "5.17.0"
+
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
-    testImplementation("org.assertj:assertj-core:3.27.3")
-    testImplementation("org.mockito:mockito-core:5.17.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    mockitoAgent("org.mockito:mockito-core:5.17.0") { isTransitive = false }
+    mockitoAgent("org.mockito:mockito-core:$mockitoVersion") { isTransitive = false }
 }
 
 tasks.jar {
