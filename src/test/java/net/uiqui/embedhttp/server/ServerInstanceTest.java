@@ -18,7 +18,9 @@ class ServerInstanceTest {
         // given
         var classUnderTest = new ServerInstance(0, 10);
         var router = Router.newRouter()
-                .get("/", req -> HttpResponse.ok(ContentType.TEXT_PLAIN, "Hello World"));
+                .get("/", req -> HttpResponse.ok()
+                        .setBody(ContentType.TEXT_PLAIN, "Hello World")
+                );
         // when
         var result = classUnderTest.start(router);
         var url = "http://localhost:" + classUnderTest.getInstancePort() + "/";
@@ -35,7 +37,9 @@ class ServerInstanceTest {
         // given
         var classUnderTest = new ServerInstance(9876, 10);
         var router = Router.newRouter()
-                .get("/", req -> HttpResponse.ok(ContentType.TEXT_PLAIN, "Hello World"));
+                .get("/", req -> HttpResponse.ok()
+                        .setBody(ContentType.TEXT_PLAIN, "Hello World")
+                );
         // when
         var result = classUnderTest.start(router);
         var url = "http://localhost:9876/";
@@ -53,7 +57,9 @@ class ServerInstanceTest {
         // given
         var classUnderTest = new ServerInstance(0, 10);
         var router = Router.newRouter()
-                .get("/", req -> HttpResponse.ok(ContentType.TEXT_PLAIN, "Hello World"));
+                .get("/", req -> HttpResponse.ok()
+                        .setBody(ContentType.TEXT_PLAIN, "Hello World")
+                );
         classUnderTest.start(router);
         var url = "http://localhost:" + classUnderTest.getInstancePort() + "/";
         // when

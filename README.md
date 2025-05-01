@@ -37,21 +37,24 @@ public class ExampleRoutes {
                     var id = request.getPathParam("id");
                     var name = request.getQueryParam("name");
                     if (name == null || name.isEmpty()) {
-                        return HttpResponse.badRequest(ContentType.TEXT_PLAIN, "Name parameter is required.");
+                        return HttpResponse.badRequest()
+                                .setBody(ContentType.TEXT_PLAIN, "Name parameter is required.");
                     }
                     // Add to queue for resource update logic
                     var response = "Resource " + id + " name's will be updated to " + name + ".";
                     return HttpResponse.withStatus(HttpStatusCode.ACCEPTED)
-                            .setBody(ContentType.TEXT_PLAIN, response)
-                            .setHeader(HttpHeader.CACHE_CONTROL, "no-cache");
+                            .setHeader(HttpHeader.CACHE_CONTROL, "no-cache")
+                            .setBody(ContentType.TEXT_PLAIN, response);
                 })
                 .get("/health", request -> {
                     // Check system health
-                    return HttpResponse.ok(ContentType.TEXT_PLAIN, "OK");
+                    return HttpResponse.ok()
+                            .setBody(ContentType.TEXT_PLAIN, "OK");
                 })
                 .get("/metrics", request -> {
                     var metrics = "metric_name 123";
-                    return HttpResponse.ok(ContentType.TEXT_PLAIN, metrics);
+                    return HttpResponse.ok()
+                            .setBody(ContentType.TEXT_PLAIN, metrics);
                 });
     }
 }

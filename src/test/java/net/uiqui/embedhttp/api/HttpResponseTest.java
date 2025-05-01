@@ -10,7 +10,8 @@ class HttpResponseTest {
     @Test
     void testOk() {
         // when
-        var result = HttpResponse.ok(ContentType.TEXT_PLAIN, "Hello, World!");
+        var result = HttpResponse.ok()
+                .setBody(ContentType.TEXT_PLAIN, "Hello, World!");
         // then
         assertThat(result).isInstanceOf(HttpResponseImpl.class);
         var classUnderTest = (HttpResponseImpl) result;
@@ -37,7 +38,8 @@ class HttpResponseTest {
     @Test
     void testNotFound() {
         // when
-        var result = HttpResponse.notFound(ContentType.TEXT_PLAIN, "Resource not found");
+        var result = HttpResponse.notFound()
+                .setBody(ContentType.TEXT_PLAIN, "Resource not found");
         // then
         assertThat(result).isInstanceOf(HttpResponseImpl.class);
         var classUnderTest = (HttpResponseImpl) result;
@@ -51,7 +53,8 @@ class HttpResponseTest {
     @Test
     void testBadRequest() {
         // when
-        var result = HttpResponse.badRequest(ContentType.APPLICATION_JSON, "{\"error\": \"Bad Request\"}");
+        var result = HttpResponse.badRequest()
+                .setBody(ContentType.APPLICATION_JSON, "{\"error\": \"Bad Request\"}");
         // then
         assertThat(result).isInstanceOf(HttpResponseImpl.class);
         var classUnderTest = (HttpResponseImpl) result;
@@ -65,7 +68,8 @@ class HttpResponseTest {
     @Test
     void testUnexpectedError() {
         // when
-        var result = HttpResponse.unexpectedError(ContentType.TEXT_PLAIN, "An unexpected error occurred");
+        var result = HttpResponse.unexpectedError()
+                .setBody(ContentType.TEXT_PLAIN, "An unexpected error occurred");
         // then
         assertThat(result).isInstanceOf(HttpResponseImpl.class);
         var classUnderTest = (HttpResponseImpl) result;

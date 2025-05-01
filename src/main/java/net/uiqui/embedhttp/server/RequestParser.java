@@ -52,7 +52,7 @@ public class RequestParser {
         String line;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            var colonIndex = line.indexOf(":");
+            var colonIndex = line.indexOf(':');
             if (colonIndex == -1) {
                 throw new ProtocolException("Invalid header line: " + line);
             }

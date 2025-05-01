@@ -38,7 +38,8 @@ public class RequestProcessor {
             var request = requestParser.parseRequest(inputStream);
             return new BreakableSequence<>(request, null);
         } catch (ProtocolException e) {
-            var response = HttpResponse.badRequest(ContentType.TEXT_PLAIN, "Bad Request: " + e.getMessage());
+            var response = HttpResponse.badRequest()
+                    .setBody(ContentType.TEXT_PLAIN, "Bad Request: " + e.getMessage());
             return new BreakableSequence<>(null, response);
         }
     }
@@ -47,7 +48,8 @@ public class RequestProcessor {
         var httpRequest = router.routeRequest(request);
 
         if (httpRequest == null) {
-            var response = HttpResponse.notFound(ContentType.TEXT_PLAIN, "Not Found:" + request.getPath());
+            var response = HttpResponse.notFound()
+                    .setBody(ContentType.TEXT_PLAIN, "Not Found:" + request.getPath());
             return new BreakableSequence<>(null, response);
         }
 
@@ -60,7 +62,8 @@ public class RequestProcessor {
         try {
             return handler.handle(httpRequest);
         } catch (Throwable e) {
-            return HttpResponse.unexpectedError(ContentType.TEXT_PLAIN, "Unexpected error executing request");
+            return HttpResponse.unexpectedError()
+                    .setBody(ContentType.TEXT_PLAIN, "Unexpected error executing request");
         }
     }
 

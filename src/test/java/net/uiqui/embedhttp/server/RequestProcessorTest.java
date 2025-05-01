@@ -24,7 +24,9 @@ class RequestProcessorTest {
             .put("/error", request -> {
                 throw new RuntimeException("Error");
             })
-            .get("/test", request -> HttpResponse.ok(ContentType.TEXT_PLAIN, "Hello World"));
+            .get("/test", request -> HttpResponse.ok()
+                    .setBody(ContentType.TEXT_PLAIN, "Hello World")
+            );
     private final RequestProcessor classUnderTest = new RequestProcessor(
             requestParser,
             responseWriter,

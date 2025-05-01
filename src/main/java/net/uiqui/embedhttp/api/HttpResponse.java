@@ -63,13 +63,10 @@ public interface HttpResponse {
     /**
      * Creates a new HTTP response with the status code 200 (OK) and the specified body.
      *
-     * @param contentType the content type
-     * @param body        the body as a string
      * @return a new HttpResponse instance
      */
-    static HttpResponse ok(ContentType contentType, String body) {
-        return withStatus(HttpStatusCode.OK)
-                .setBody(contentType, body);
+    static HttpResponse ok() {
+        return withStatus(HttpStatusCode.OK);
     }
 
     /**
@@ -84,36 +81,27 @@ public interface HttpResponse {
     /**
      * Creates a new HTTP response with the status code 404 (Not Found) and the specified body.
      *
-     * @param contentType the content type
-     * @param body        the body as a string
      * @return a new HttpResponse instance
      */
-    static HttpResponse notFound(ContentType contentType, String body) {
-        return withStatus(HttpStatusCode.NOT_FOUND)
-                .setBody(contentType, body);
+    static HttpResponse notFound() {
+        return withStatus(HttpStatusCode.NOT_FOUND);
     }
 
     /**
      * Creates a new HTTP response with the status code 400 (Bad Request) and the specified body.
      *
-     * @param contentType the content type
-     * @param body        the body as a string
      * @return a new HttpResponse instance
      */
-    static HttpResponse badRequest(ContentType contentType, String body) {
-        return withStatus(HttpStatusCode.BAD_REQUEST)
-                .setBody(contentType, body);
+    static HttpResponse badRequest() {
+        return withStatus(HttpStatusCode.BAD_REQUEST);
     }
 
     /**
      * Creates a new HTTP response with the status code 500 (Internal Server Error) and the specified body.
      *
-     * @param contentType the content type
-     * @param body        the body as a string
      * @return a new HttpResponse instance
      */
-    static HttpResponse unexpectedError(ContentType contentType, String body) {
-        return withStatus(HttpStatusCode.INTERNAL_SERVER_ERROR)
-                .setBody(contentType, body);
+    static HttpResponse unexpectedError() {
+        return withStatus(HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
 }
