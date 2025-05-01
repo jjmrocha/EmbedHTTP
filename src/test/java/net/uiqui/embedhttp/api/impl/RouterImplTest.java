@@ -79,7 +79,7 @@ class RouterImplTest {
     }
 
     private static RouterImpl buildRouterImpl() {
-        HttpRequestHandler handler = (x) -> HttpResponse.noContent();
+        HttpRequestHandler handler = x -> HttpResponse.noContent();
         var router = Router.newRouter()
                 .get("/get", handler)
                 .put("/put/:id", handler)

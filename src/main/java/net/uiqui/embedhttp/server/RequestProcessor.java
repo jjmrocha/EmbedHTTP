@@ -61,7 +61,7 @@ public class RequestProcessor {
 
         try {
             return handler.handle(httpRequest);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             return HttpResponse.unexpectedError()
                     .setBody(ContentType.TEXT_PLAIN, "Unexpected error executing request");
         }

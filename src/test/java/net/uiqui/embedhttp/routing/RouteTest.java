@@ -17,13 +17,13 @@ class RouteTest {
     @MethodSource("pathRequests")
     void testBuilder(String path, Pattern regex) {
         // given
-        HttpRequestHandler handler = (req) -> HttpResponse.noContent();
+        HttpRequestHandler handler = req -> HttpResponse.noContent();
         // when
         var result = new Route(HttpMethod.GET, path, handler);
         // then
         assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(result.getPathPattern()).isEqualTo(path);
-        assertThat(result.getPathRegexPattern().toString()).isEqualTo(regex.toString());
+        assertThat(result.getPathRegexPattern()).hasToString(regex.toString());
         assertThat(result.getHandler()).isEqualTo(handler);
     }
 

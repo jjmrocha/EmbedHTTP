@@ -6,14 +6,14 @@ import net.uiqui.embedhttp.api.HttpRequestHandler;
 import net.uiqui.embedhttp.routing.Route;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
 
 public abstract class RoutingBuilder implements Router {
-    private final Map<HttpMethod, List<Route>> routingTable = new HashMap<>();
+    private final Map<HttpMethod, List<Route>> routingTable = new EnumMap<>(HttpMethod.class);
 
     private RoutingBuilder withRoute(HttpMethod method, String pathPattern, HttpRequestHandler handler) {
         var route = new Route(method, pathPattern, handler);

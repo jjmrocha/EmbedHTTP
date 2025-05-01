@@ -26,8 +26,8 @@ class ServerInstanceTest {
         var url = "http://localhost:" + classUnderTest.getInstancePort() + "/";
         var response = callEndpoint(url);
         // then
-        assertThat(result).isEqualTo(true);
-        assertThat(classUnderTest.isRunning()).isEqualTo(true);
+        assertThat(result).isTrue();
+        assertThat(classUnderTest.isRunning()).isTrue();
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).isEqualTo("Hello World");
     }
@@ -45,8 +45,8 @@ class ServerInstanceTest {
         var url = "http://localhost:9876/";
         var response = callEndpoint(url);
         // then
-        assertThat(result).isEqualTo(true);
-        assertThat(classUnderTest.isRunning()).isEqualTo(true);
+        assertThat(result).isTrue();
+        assertThat(classUnderTest.isRunning()).isTrue();
         assertThat(classUnderTest.getInstancePort()).isEqualTo(9876);
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).isEqualTo("Hello World");
@@ -68,8 +68,8 @@ class ServerInstanceTest {
                 callEndpoint(url)
         );
         // then
-        assertThat(result).isEqualTo(true);
-        assertThat(classUnderTest.isRunning()).isEqualTo(false);
+        assertThat(result).isTrue();
+        assertThat(classUnderTest.isRunning()).isFalse();
         assertThat(response).isInstanceOf(ConnectException.class);
         assertThat(classUnderTest.getInstancePort()).isEqualTo(-1);
     }

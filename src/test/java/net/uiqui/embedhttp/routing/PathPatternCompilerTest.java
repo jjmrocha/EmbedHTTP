@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PathPatternCompilerTest {
     @ParameterizedTest
     @MethodSource("pathRequests")
-    public void testPathToRegex(String path, String regex) {
+    void testPathToRegex(String path, String regex) {
         // when
         var result = PathPatternCompiler.pathToRegex(path);
         // then
@@ -22,12 +22,12 @@ class PathPatternCompilerTest {
 
     @ParameterizedTest
     @MethodSource("pathRequests")
-    public void testCompile(String path, String regex, String example, Map<String, String> parms) {
+    void testCompile(String path, String regex, String example, Map<String, String> parms) {
         // when
         var compilePath = PathPatternCompiler.compile(path);
         var matcher = compilePath.matcher(example);
         // then
-        assertThat(matcher.matches()).isEqualTo(true);
+        assertThat(matcher.matches()).isTrue();
         assertThat(matcher.groupCount()).isEqualTo(parms.size());
 
         for (var entry : parms.entrySet()) {

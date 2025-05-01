@@ -51,8 +51,9 @@ class HttpRequestImplTest {
         // when
         var result = classUnderTest.getQueryParameters();
         // then
-        assertThat(result).containsEntry("name1", "value1");
-        assertThat(result).containsEntry("name2", "val 2");
+        assertThat(result)
+                .containsEntry("name1", "value1")
+                .containsEntry("name2", "val 2");
     }
 
     @Test

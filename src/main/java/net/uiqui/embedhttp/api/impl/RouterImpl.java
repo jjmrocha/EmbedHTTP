@@ -33,7 +33,7 @@ public class RouterImpl extends RoutingBuilder {
     }
 
     private static HashMap<String, String> extractPathParameters(Matcher matcher) {
-        var pathParameters = new HashMap<String, String>(matcher.groupCount());
+        HashMap<String, String> pathParameters = HashMap.newHashMap(matcher.groupCount());
 
         for (var matchedGroup : matcher.namedGroups().entrySet()) {
             var key = matchedGroup.getKey();

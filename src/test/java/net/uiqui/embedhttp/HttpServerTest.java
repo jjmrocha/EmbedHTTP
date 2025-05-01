@@ -15,6 +15,6 @@ class HttpServerTest {
         var result = HttpServer.newInstance(port);
         // then
         assertThat(result).isInstanceOf(ServerInstance.class);
-        assertThat(result.isRunning()).isEqualTo(false);
+        assertThat(result.isRunning()).isFalse();
     }
 }

@@ -9,10 +9,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StateMachineTest {
+class StateMachineTest {
     @ParameterizedTest
     @MethodSource("statusCombinations")
-    public void testIsValidStatusChange(ServerState currentServerState, ServerState newServerState, boolean expected) {
+    void testIsValidStatusChange(ServerState currentServerState, ServerState newServerState, boolean expected) {
         // given
         var classUnderTest = new StateMachine(currentServerState);
         // when
@@ -22,7 +22,7 @@ public class StateMachineTest {
     }
 
     @Test
-    public void testGetCurrentStatus() {
+    void testGetCurrentStatus() {
         // given
         var classUnderTest = new StateMachine(ServerState.STARTING);
         // when
@@ -33,7 +33,7 @@ public class StateMachineTest {
 
     @ParameterizedTest
     @MethodSource("statusCombinations")
-    public void testSetStatus(ServerState initialServerState, ServerState newServerState, boolean shouldChange) {
+    void testSetStatus(ServerState initialServerState, ServerState newServerState, boolean shouldChange) {
         // given
         var classUnderTest = new StateMachine(initialServerState);
         // when
@@ -50,7 +50,7 @@ public class StateMachineTest {
     }
 
     @Test
-    public void testWaitForStatus() throws InterruptedException {
+    void testWaitForStatus() throws InterruptedException {
         // given
         var classUnderTest = new StateMachine(ServerState.STARTING);
         var parallelThread = new Thread(() -> {
@@ -72,7 +72,7 @@ public class StateMachineTest {
     }
 
     @Test
-    public void testWaitForStatusWithMultipleWantedStatus() throws InterruptedException {
+    void testWaitForStatusWithMultipleWantedStatus() throws InterruptedException {
         // given
         var classUnderTest = new StateMachine(ServerState.STARTING);
         var parallelThread = new Thread(() -> {

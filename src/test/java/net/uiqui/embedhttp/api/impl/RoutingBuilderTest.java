@@ -13,7 +13,7 @@ class RoutingBuilderTest {
     @Test
     void testNewRouter() {
         // given
-        HttpRequestHandler handler = (request) -> HttpResponse.noContent();
+        HttpRequestHandler handler = request -> HttpResponse.noContent();
         // when
         var result = Router.newRouter()
                 .get("/get", handler)

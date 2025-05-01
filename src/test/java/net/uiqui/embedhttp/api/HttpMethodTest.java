@@ -11,7 +11,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class HttpMethodTest {
     @ParameterizedTest
     @MethodSource("httpMethods")
-    public void testFromString(String value, HttpMethod expected) {
+    void testFromString(String value, HttpMethod expected) {
         // when
         var result = HttpMethod.fromString(value);
         // then

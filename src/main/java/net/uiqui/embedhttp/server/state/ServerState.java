@@ -4,5 +4,5 @@ public enum ServerState {
     STARTING,
     RUNNING,
     STOPPING,
-    STOPPED;
+    STOPPED
 }
