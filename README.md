@@ -132,6 +132,9 @@ curl http://localhost:8080/metrics
 # Output: metric_name 123
 ```
 
+## Documentation
+The JavaDoc documentation for project is available on the [javadoc.io](https://www.javadoc.io/doc/net.uiqui/embedhttp/latest/index.html) site.
+
 ## License
 EmbedHTTP is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
