@@ -14,7 +14,8 @@ import net.uiqui.embedhttp.api.impl.RouterImpl;
  * <pre>
  *     Router router = Router.newRouter()
  *     .get("/api/resource/:id", request -> {
- *       return HttpResponse.ok(ContentType.TEXT_PLAIN, "Resource ID: " + request.getPathParameter("id");
+ *       return HttpResponse.ok()
+ *          .setBody(ContentType.TEXT_PLAIN, "Resource ID: " + request.getPathParameter("id"));
  *     })
  *     .post("/api/resource", request -> {
  *     // Handle POST request
