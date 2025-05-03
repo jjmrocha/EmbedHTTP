@@ -21,7 +21,22 @@ EmbedHTTP is a lightweight, dependency-free HTTP/1.1 server designed to be easil
 ## Getting Started
 
 ### Adding EmbedHTTP to Your Project
-No maven artifact is available yet.
+We can add EmbedHTTP to your project using Maven or Gradle.
+
+#### Maven
+```pom
+<dependency>
+    <groupId>net.uiqui</groupId>
+    <artifactId>embedhttp</artifactId>
+    <version>0.5.0</version>
+</dependency>
+```
+
+#### Gradle
+```groovy
+implementation 'net.uiqui:embedhttp:0.5.0'
+```
+
 
 ### Example Usage
 Below is an example of how to use EmbedHTTP to expose some endpoints like a liveness probe and a metrics endpoint.
