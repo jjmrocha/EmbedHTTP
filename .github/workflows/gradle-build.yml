@@ -1,4 +1,4 @@
-name: Gradle Package Publisher
+name: Gradle Builder
 
 on:
   pull_request:
