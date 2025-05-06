@@ -1,11 +1,11 @@
-name: Gradle Builder
+name: Run Tests
 
 on:
   pull_request:
     branches: [main]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     permissions:
       contents: read

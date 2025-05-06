@@ -1,13 +1,11 @@
-name: Gradle Package Publisher
+name: Package Publisher
 
 on:
-  pull_request:
-    branches: [main]
-    types: [closed]
+  release:
+    types: [created]
 
 jobs:
-  build:
-    if: github.event.pull_request.merged == true
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
