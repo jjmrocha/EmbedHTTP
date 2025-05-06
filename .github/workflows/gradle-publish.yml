@@ -1,19 +1,13 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a package using Gradle and then publish it to MavenCentral when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
-
 name: Gradle Package
 
 on:
-  release:
-    types: [created]
+  pull_request:
+    branches: [main]
+    types: [closed]
 
 jobs:
   build:
-
+    if: github.event.pull_request.merged == false
     runs-on: ubuntu-latest
     permissions:
       contents: read
