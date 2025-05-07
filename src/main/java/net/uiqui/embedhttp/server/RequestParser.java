@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ProtocolException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public class RequestParser {
@@ -47,8 +46,8 @@ public class RequestParser {
         return new RequestLine(method, url, version);
     }
 
-    private Map<String, String> decodeRequestHeaders(BufferedReader reader) throws IOException {
-        var headers = new HashMap<String, String>();
+    private InsensitiveMap decodeRequestHeaders(BufferedReader reader) throws IOException {
+        var headers = new InsensitiveMap();
         String line;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {

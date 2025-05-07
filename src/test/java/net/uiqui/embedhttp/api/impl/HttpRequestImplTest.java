@@ -2,6 +2,7 @@ package net.uiqui.embedhttp.api.impl;
 
 import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.routing.Route;
+import net.uiqui.embedhttp.server.InsensitiveMap;
 import net.uiqui.embedhttp.server.Request;
 import org.junit.jupiter.api.Test;
 
@@ -81,7 +82,7 @@ class HttpRequestImplTest {
     @Test
     void testGetHeaders() {
         // given
-        var headers = Map.of("header1", "value1", "header2", "value2");
+        var headers = InsensitiveMap.from(Map.of("header1", "value1", "header2", "value2"));
         var request = new Request(HttpMethod.GET, "/", headers, null);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
@@ -125,12 +126,12 @@ class HttpRequestImplTest {
     }
 
     @Test
-    void testPathParameters() {
+    void testGetPathParameters() {
         // given
-        var pathParameters = Map.of("param1", "value1", "param2", "value2");
+        var pathParameters = InsensitiveMap.from(Map.of("param1", "value1", "param2", "value2"));
         var classUnderTest = new HttpRequestImpl(null, null, pathParameters);
         // when
-        var result = classUnderTest.pathParameters();
+        var result = classUnderTest.getPathParameters();
         // then
         assertThat(result).isEqualTo(pathParameters);
     }

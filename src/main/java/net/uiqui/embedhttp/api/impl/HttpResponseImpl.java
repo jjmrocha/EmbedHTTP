@@ -4,15 +4,15 @@ import net.uiqui.embedhttp.api.ContentType;
 import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.api.HttpStatusCode;
+import net.uiqui.embedhttp.server.InsensitiveMap;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class HttpResponseImpl implements HttpResponse {
     private final int statusCode;
     private final String statusMessage;
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new InsensitiveMap();
     private String body = null;
 
     public HttpResponseImpl(HttpStatusCode statusCode) {

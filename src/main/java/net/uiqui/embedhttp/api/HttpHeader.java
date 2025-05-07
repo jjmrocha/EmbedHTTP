@@ -19,8 +19,7 @@ public enum HttpHeader {
     USER_AGENT("User-Agent"),
     SET_COOKIE("Set-Cookie"),
     TRANSFER_ENCODING("Transfer-Encoding"),
-    CONNECTION("Connection"),
-    UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests");
+    CONNECTION("Connection");
 
     private final String value;
 

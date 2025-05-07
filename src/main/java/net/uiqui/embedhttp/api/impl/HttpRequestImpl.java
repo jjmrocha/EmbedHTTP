@@ -10,7 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public record HttpRequestImpl(Request request, Route route, Map<String, String> pathParameters) implements HttpRequest {
+public record HttpRequestImpl(Request request,
+                              Route route,
+                              Map<String, String> pathParameters) implements HttpRequest {
+
     @Override
     public HttpMethod getMethod() {
         return request.getMethod();
@@ -52,5 +55,10 @@ public record HttpRequestImpl(Request request, Route route, Map<String, String> 
     @Override
     public String getBody() {
         return request.getBody();
+    }
+
+    @Override
+    public Map<String, String> getPathParameters() {
+        return pathParameters;
     }
 }
