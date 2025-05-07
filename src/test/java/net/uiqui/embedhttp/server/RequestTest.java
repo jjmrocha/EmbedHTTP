@@ -16,7 +16,7 @@ class RequestTest {
     void testBuilder(String url, String path, String query) {
         // given
         var method = HttpMethod.GET;
-        var headers = Map.of("header1", "value1", "header2", "value2");
+        var headers = InsensitiveMap.from(Map.of("header1", "value1", "header2", "value2"));
         var body = "request body";
         // when
         var result = new Request(method, url, headers, body);

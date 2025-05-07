@@ -28,13 +28,13 @@ We can add EmbedHTTP to your project using Maven or Gradle.
 <dependency>
     <groupId>net.uiqui</groupId>
     <artifactId>embedhttp</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
 </dependency>
 ```
 
 #### Gradle
 ```groovy
-implementation 'net.uiqui:embedhttp:0.5.0'
+implementation 'net.uiqui:embedhttp:0.5.1'
 ```
 
 
@@ -55,8 +55,8 @@ public class ExampleRoutes {
         var api = Router.newRouter();
         
         api.put("/resource/:id", request -> {
-            var id = request.getPathParam("id");
-            var name = request.getQueryParam("name");
+            var id = request.getPathParameter("id");
+            var name = request.getQueryParameter("name");
             if (name == null || name.isEmpty()) {
                 return HttpResponse.badRequest()
                         .setBody(ContentType.TEXT_PLAIN, "Name parameter is required.");

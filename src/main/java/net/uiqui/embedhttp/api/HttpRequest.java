@@ -33,7 +33,17 @@ public interface HttpRequest {
      *
      * @return a map of path parameter names to their values
      */
-    Map<String, String> pathParameters();
+    Map<String, String> getPathParameters();
+
+    /**
+     * Gets a specific path parameter by name.
+     *
+     * @param name the name of the path parameter
+     * @return the value of the path parameter, or null if not found
+     */
+    default String getPathParameter(String name) {
+        return getPathParameters().get(name);
+    }
 
     /**
      * Gets the query parameters from the URL.
@@ -43,11 +53,49 @@ public interface HttpRequest {
     Map<String, String> getQueryParameters();
 
     /**
+     * Gets a specific query parameter by name.
+     *
+     * @param name the name of the query parameter
+     * @return the value of the query parameter, or null if not found
+     */
+    default String getQueryParameter(String name) {
+        return getQueryParameters().get(name);
+    }
+
+    /**
      * Gets the headers of the request.
      *
      * @return a map of header names to their values
      */
     Map<String, String> getHeaders();
+
+    /**
+     * Gets a specific header by name.
+     *
+     * @param name the name of the header
+     * @return the value of the header, or null if not found
+     */
+    default String getHeader(String name) {
+        return getHeaders().get(name);
+    }
+
+    /**
+     * Gets the content type of the request.
+     *
+     * @return the content type as a string
+     */
+    default String getContentType() {
+        return getHeader(HttpHeader.CONTENT_TYPE.getValue());
+    }
+
+    /**
+     * Gets the accept header of the request.
+     *
+     * @return the accept header as a string
+     */
+    default String getAccept() {
+        return getHeader(HttpHeader.ACCEPT.getValue());
+    }
 
     /**
      * Gets the body of the request.

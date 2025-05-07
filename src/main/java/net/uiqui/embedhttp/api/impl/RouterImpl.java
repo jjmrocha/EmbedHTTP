@@ -1,8 +1,10 @@
 package net.uiqui.embedhttp.api.impl;
 
+import net.uiqui.embedhttp.server.InsensitiveMap;
 import net.uiqui.embedhttp.server.Request;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 public class RouterImpl extends RoutingBuilder {
@@ -32,7 +34,7 @@ public class RouterImpl extends RoutingBuilder {
         return null;
     }
 
-    private static HashMap<String, String> extractPathParameters(Matcher matcher) {
+    private static Map<String, String> extractPathParameters(Matcher matcher) {
         HashMap<String, String> pathParameters = HashMap.newHashMap(matcher.groupCount());
 
         for (var matchedGroup : matcher.namedGroups().entrySet()) {

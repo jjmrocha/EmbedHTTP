@@ -7,7 +7,6 @@ import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.server.Request;
 import org.junit.jupiter.api.Test;
 
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RouterImplTest {
@@ -15,7 +14,7 @@ class RouterImplTest {
     void testRouteRequestWithGetMethod() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.GET, "/get?name=value", emptyMap(), null);
+        var request = new Request(HttpMethod.GET, "/get?name=value", null, null);
         // when
         var result = classUnderTest.routeRequest(request);
         // then
@@ -29,7 +28,7 @@ class RouterImplTest {
     void testRouteRequestWithPutMethodAndPathParameter() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.PUT, "/put/123", emptyMap(), null);
+        var request = new Request(HttpMethod.PUT, "/put/123", null, null);
         // when
         var result = classUnderTest.routeRequest(request);
         // then
@@ -37,14 +36,14 @@ class RouterImplTest {
         assertThat(result.route().getMethod()).isEqualTo(HttpMethod.PUT);
         assertThat(result.route().getPathPattern()).isEqualTo("/put/:id");
         assertThat(result.request()).isEqualTo(request);
-        assertThat(result.pathParameters()).containsEntry("id", "123");
+        assertThat(result.getPathParameters()).containsEntry("id", "123");
     }
 
     @Test
     void testRouteRequestWithPostMethod() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.POST, "/post", emptyMap(), null);
+        var request = new Request(HttpMethod.POST, "/post", null, null);
         // when
         var result = classUnderTest.routeRequest(request);
         // then
@@ -55,7 +54,7 @@ class RouterImplTest {
     void testRouteRequestWithPutMethodAndNoPathParameter() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.PUT, "/put", emptyMap(), null);
+        var request = new Request(HttpMethod.PUT, "/put", null, null);
         // when
         var result = classUnderTest.routeRequest(request);
         // then
@@ -66,7 +65,7 @@ class RouterImplTest {
     void testRouteRequestWithMultiplePathParameters() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.POST, "/v1/resource/123/section/abc", emptyMap(), null);
+        var request = new Request(HttpMethod.POST, "/v1/resource/123/section/abc", null, null);
         // when
         var result = classUnderTest.routeRequest(request);
         // then
@@ -74,8 +73,8 @@ class RouterImplTest {
         assertThat(result.route().getMethod()).isEqualTo(HttpMethod.POST);
         assertThat(result.route().getPathPattern()).isEqualTo("/v1/resource/:id/section/:name");
         assertThat(result.request()).isEqualTo(request);
-        assertThat(result.pathParameters()).containsEntry("id", "123");
-        assertThat(result.pathParameters()).containsEntry("name", "abc");
+        assertThat(result.getPathParameters()).containsEntry("id", "123");
+        assertThat(result.getPathParameters()).containsEntry("name", "abc");
     }
 
     private static RouterImpl buildRouterImpl() {

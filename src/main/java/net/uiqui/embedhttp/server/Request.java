@@ -7,12 +7,12 @@ import java.util.Map;
 public class Request {
     private final HttpMethod method;
     private final String url;
-    private final Map<String, String> headers;
+    private final InsensitiveMap headers;
     private final String body;
     private final String path;
     private final String query;
 
-    public Request(HttpMethod method, String url, Map<String, String> headers, String body) {
+    public Request(HttpMethod method, String url, InsensitiveMap headers, String body) {
         this.method = method;
         this.url = url;
         this.headers = headers;
