@@ -132,6 +132,47 @@ curl http://localhost:8080/metrics
 # Output: metric_name 123
 ```
 
+## Benchmark
+To assess the performance of EmbedHTTP, we conducted a benchmark against Spring Boot using the [TestEmbedHTTP](https://github.com/jjmrocha/TestEmbedHTTP) repository. 
+The evaluation involved running a 120-second load test with the [Beast](https://github.com/jjmrocha/beast) stress testing tool.
+
+Given the project's goal, to provide a lightweight HTTP server without the overhead of a full-featured HTTP server. We simulated a realistic scenario with two permanently concurrent client requests. 
+The stress test results are the following:
+```
+===== System =====
+Operating System: darwin
+System Architecture: arm64
+Logical CPUs: 8
+===== Test =====
+Request template: get-plain.yaml
+Sample Data: test-data.csv
+Configuration: beast-config.json
+Test duration: 120 seconds
+Number of concurrent requests: 2
+===== Stats =====
+Executed requests: 1305289
+Time taken to complete: 2m0.000583417s
+Requests per second: 11657.6585
+Avg response time: 171.561µs
+===== Status 200 =====
+1305289 requests, with avg response time of 171.561µs
+And the following distribution:
+- The fastest request took 72.917µs
+- 20% of requests under 134.959µs
+- 40% of requests under 149.542µs
+- 60% of requests under 164.792µs
+- 80% of requests under 187.291µs
+- 90% of requests under 208.417µs
+- 95% of requests under 233.708µs
+- 99% of requests under 330.542µs
+- The slowest request took 74.63675ms
+```
+
+Has expected EmbedHTTP doesn't have the same performance as Spring Boot:
+![Request per Second](https://raw.githubusercontent.com/jjmrocha/TestEmbedHTTP/refs/heads/main/Images/EmbedHTTP-0.5.1-RPS.png)
+
+![95% of requests under](https://raw.githubusercontent.com/jjmrocha/TestEmbedHTTP/refs/heads/main/Images/EmbedHTTP-0.5.1-95Percent.png)
+
 ## Documentation
 The JavaDoc documentation for project is available on the [javadoc.io](https://www.javadoc.io/doc/net.uiqui/embedhttp/latest/index.html) site.
 
