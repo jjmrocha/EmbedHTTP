@@ -12,6 +12,7 @@ public enum HttpHeader {
     CONTENT_LENGTH("Content-Length"),
     CONTENT_TYPE("Content-Type"),
     COOKIE("Cookie"),
+    DATE("Date"),
     HOST("Host"),
     LOCATION("Location"),
     ORIGIN("Origin"),
