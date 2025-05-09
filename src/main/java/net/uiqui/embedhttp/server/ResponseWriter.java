@@ -10,6 +10,8 @@ public class ResponseWriter {
     public static final String HTTP_VERSION_1_1 = "HTTP/1.1";
     public static final String CRLF = "\r\n";
 
+    private final DateHeader dateHeader = new DateHeader();
+
     public void writeResponse(OutputStream outputStream, HttpResponseImpl response) throws IOException {
         var builder = new StringBuilder();
 
@@ -28,6 +30,12 @@ public class ResponseWriter {
                     .append(header.getValue())
                     .append(CRLF);
         }
+
+        // Write the Date header
+        builder.append(HttpHeader.DATE.getValue())
+                .append(": ")
+                .append(dateHeader.getDateHeaderValue())
+                .append(CRLF);
 
         // Write close connection header if not already set
         if (!response.getHeaders().containsKey(HttpHeader.CONNECTION.getValue())) {

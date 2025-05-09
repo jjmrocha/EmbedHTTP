@@ -4,7 +4,10 @@ import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.ContentType;
 import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.api.impl.RouterImpl;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,10 +15,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 
 class RequestProcessorTest {
     private final RequestParser requestParser = new RequestParser();
@@ -32,6 +37,20 @@ class RequestProcessorTest {
             responseWriter,
             (RouterImpl) router
     );
+
+    private MockedStatic<Now> mockedNow;
+
+    @BeforeEach
+    void setUp() {
+        mockedNow = mockStatic(Now.class);
+        var now = ZonedDateTime.parse("2023-10-01T12:00:00.100Z");
+        mockedNow.when(Now::asZonedDateTime).thenReturn(now);
+    }
+
+    @AfterEach
+    void tearDown() {
+        mockedNow.close();
+    }
 
     @Test
     void testProcessValidRequest() throws IOException {
@@ -53,6 +72,7 @@ class RequestProcessorTest {
                 HTTP/1.1 200 OK\r
                 Content-Length: 11\r
                 Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
                 Connection: close\r
                 \r
                 Hello World""";
@@ -76,7 +96,8 @@ class RequestProcessorTest {
         var expected = """
                 HTTP/1.1 400 Bad Request\r
                 Content-Length: 50\r
-                Content-Type: text/plain\r  
+                Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
                 Connection: close\r
                 \r
                 Bad Request: Invalid request line: POST /noContent""";
@@ -104,6 +125,7 @@ class RequestProcessorTest {
                 HTTP/1.1 404 Not Found\r
                 Content-Length: 19\r
                 Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
                 Connection: close\r
                 \r
                 Not Found:/notFound""";
@@ -131,6 +153,7 @@ class RequestProcessorTest {
                 HTTP/1.1 500 Internal Server Error\r
                 Content-Length: 34\r
                 Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
                 Connection: close\r
                 \r
                 Unexpected error executing request""";
