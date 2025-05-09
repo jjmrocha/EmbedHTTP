@@ -28,13 +28,13 @@ We can add EmbedHTTP to your project using Maven or Gradle.
 <dependency>
     <groupId>net.uiqui</groupId>
     <artifactId>embedhttp</artifactId>
-    <version>0.5.1</version>
+    <version>0.5.2</version>
 </dependency>
 ```
 
 #### Gradle
 ```groovy
-implementation 'net.uiqui:embedhttp:0.5.1'
+implementation 'net.uiqui:embedhttp:0.5.2'
 ```
 
 
