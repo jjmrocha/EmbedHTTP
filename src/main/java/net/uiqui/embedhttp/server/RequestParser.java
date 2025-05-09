@@ -26,12 +26,11 @@ public class RequestParser {
 
     private RequestLine decodeRequestLine(BufferedReader reader) throws IOException {
         var line = reader.readLine();
-
         if (line == null || line.isEmpty()) {
             throw new ProtocolException("Invalid request line: line is null or empty");
         }
 
-        var parts = line.split(" ");
+        var parts = line.split(" ", 3);
         if (parts.length != 3) {
             throw new ProtocolException("Invalid request line: " + line);
         }

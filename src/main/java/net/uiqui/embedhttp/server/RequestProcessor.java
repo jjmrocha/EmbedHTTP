@@ -25,12 +25,10 @@ public class RequestProcessor {
     }
 
     public void process(Socket clientSocket) throws IOException {
-        try (clientSocket) {
-            var response = parse(clientSocket.getInputStream())
-                    .next(this::route)
-                    .then(this::execute);
-            write(response, clientSocket.getOutputStream());
-        }
+        var response = parse(clientSocket.getInputStream())
+                .next(this::route)
+                .then(this::execute);
+        write(response, clientSocket.getOutputStream());
     }
 
     private BreakableSequence<Request> parse(InputStream inputStream) throws IOException {

@@ -1,6 +1,5 @@
 package net.uiqui.embedhttp.api.impl;
 
-import net.uiqui.embedhttp.server.InsensitiveMap;
 import net.uiqui.embedhttp.server.Request;
 
 import java.util.HashMap;
