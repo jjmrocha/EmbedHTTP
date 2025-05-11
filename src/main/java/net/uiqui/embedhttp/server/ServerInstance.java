@@ -2,7 +2,7 @@ package net.uiqui.embedhttp.server;
 
 import net.uiqui.embedhttp.HttpServer;
 import net.uiqui.embedhttp.Router;
-import net.uiqui.embedhttp.api.impl.RouterImpl;
+import net.uiqui.embedhttp.routing.RouterImpl;
 import net.uiqui.embedhttp.server.state.ServerState;
 import net.uiqui.embedhttp.server.state.StateMachine;
 

@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp.api.impl;
+package net.uiqui.embedhttp.routing;
 
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.HttpMethod;
@@ -19,9 +19,9 @@ class RouterImplTest {
         var result = classUnderTest.routeRequest(request);
         // then
         assertThat(result).isNotNull();
-        assertThat(result.route().getMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(result.route().getPathPattern()).isEqualTo("/get");
-        assertThat(result.request()).isEqualTo(request);
+        assertThat(result.getRoute().getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(result.getRoute().getPathPattern()).isEqualTo("/get");
+        assertThat(result.getRequest()).isEqualTo(request);
     }
 
     @Test
@@ -33,9 +33,9 @@ class RouterImplTest {
         var result = classUnderTest.routeRequest(request);
         // then
         assertThat(result).isNotNull();
-        assertThat(result.route().getMethod()).isEqualTo(HttpMethod.PUT);
-        assertThat(result.route().getPathPattern()).isEqualTo("/put/:id");
-        assertThat(result.request()).isEqualTo(request);
+        assertThat(result.getRoute().getMethod()).isEqualTo(HttpMethod.PUT);
+        assertThat(result.getRoute().getPathPattern()).isEqualTo("/put/:id");
+        assertThat(result.getRequest()).isEqualTo(request);
         assertThat(result.getPathParameters()).containsEntry("id", "123");
     }
 
@@ -70,9 +70,9 @@ class RouterImplTest {
         var result = classUnderTest.routeRequest(request);
         // then
         assertThat(result).isNotNull();
-        assertThat(result.route().getMethod()).isEqualTo(HttpMethod.POST);
-        assertThat(result.route().getPathPattern()).isEqualTo("/v1/resource/:id/section/:name");
-        assertThat(result.request()).isEqualTo(request);
+        assertThat(result.getRoute().getMethod()).isEqualTo(HttpMethod.POST);
+        assertThat(result.getRoute().getPathPattern()).isEqualTo("/v1/resource/:id/section/:name");
+        assertThat(result.getRequest()).isEqualTo(request);
         assertThat(result.getPathParameters()).containsEntry("id", "123");
         assertThat(result.getPathParameters()).containsEntry("name", "abc");
     }

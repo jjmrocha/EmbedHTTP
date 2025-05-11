@@ -3,7 +3,7 @@ package net.uiqui.embedhttp.server;
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.ContentType;
 import net.uiqui.embedhttp.api.HttpResponse;
-import net.uiqui.embedhttp.api.impl.RouterImpl;
+import net.uiqui.embedhttp.routing.RouterImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
