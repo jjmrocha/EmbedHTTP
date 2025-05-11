@@ -27,7 +27,6 @@ public class ServerInstance implements HttpServer {
 
     private final StateMachine stateMachine = new StateMachine(ServerState.STOPPED);
     private final AtomicInteger instancePort = new AtomicInteger(-1);
-    private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
     private final int port;
     private final int backlog;
 
@@ -64,8 +63,10 @@ public class ServerInstance implements HttpServer {
                 stateMachine.setState(ServerState.RUNNING);
                 logger.log(INFO, () -> serverLogMessage("Started on port " + serverSocket.getLocalPort()));
 
-                while (stateMachine.getCurrentState() == ServerState.RUNNING) {
-                    acceptAndProcess(serverSocket, requestProcessor);
+                try (var executorService = Executors.newVirtualThreadPerTaskExecutor()) {
+                    while (stateMachine.getCurrentState() == ServerState.RUNNING) {
+                        acceptAndProcess(serverSocket, executorService, requestProcessor);
+                    }
                 }
             } catch (Exception e) {
                 logger.log(ERROR, () -> serverLogMessage("Error starting server"), e);
@@ -79,10 +80,10 @@ public class ServerInstance implements HttpServer {
         return newState == ServerState.RUNNING;
     }
 
-    private void acceptAndProcess(ServerSocket serverSocket, RequestProcessor requestProcessor) throws IOException {
+    private void acceptAndProcess(ServerSocket serverSocket, ExecutorService executorService, RequestProcessor requestProcessor) throws IOException {
         try {
             var clientSocket = serverSocket.accept();
-            handleRequest(clientSocket, requestProcessor);
+            handleRequest(clientSocket, executorService, requestProcessor);
         } catch (SocketTimeoutException e) {
             // Ignore timeout exception
         } catch (SocketException e) {
@@ -90,7 +91,7 @@ public class ServerInstance implements HttpServer {
         }
     }
 
-    private void handleRequest(Socket clientSocket, RequestProcessor requestProcessor) {
+    private void handleRequest(Socket clientSocket, ExecutorService executorService, RequestProcessor requestProcessor) {
         executorService.submit(() -> {
             try (clientSocket) {
                 requestProcessor.process(clientSocket);
