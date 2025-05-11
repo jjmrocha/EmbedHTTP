@@ -1,9 +1,8 @@
-package net.uiqui.embedhttp.api.impl;
+package net.uiqui.embedhttp.routing;
 
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
-import net.uiqui.embedhttp.routing.Route;
 
 import java.util.ArrayList;
 import java.util.EnumMap;

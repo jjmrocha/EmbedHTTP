@@ -1,5 +1,6 @@
-package net.uiqui.embedhttp.api.impl;
+package net.uiqui.embedhttp.routing;
 
+import net.uiqui.embedhttp.api.impl.HttpRequestImpl;
 import net.uiqui.embedhttp.server.Request;
 
 import java.util.HashMap;

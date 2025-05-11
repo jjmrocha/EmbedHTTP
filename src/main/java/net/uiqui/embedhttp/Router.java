@@ -1,7 +1,7 @@
 package net.uiqui.embedhttp;
 
 import net.uiqui.embedhttp.api.HttpRequestHandler;
-import net.uiqui.embedhttp.api.impl.RouterImpl;
+import net.uiqui.embedhttp.routing.RouterImpl;
 
 /**
  * Interface for a router that maps HTTP request paths to handlers.

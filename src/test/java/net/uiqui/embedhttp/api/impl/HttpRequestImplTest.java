@@ -80,6 +80,28 @@ class HttpRequestImplTest {
     }
 
     @Test
+    void testExtractQueryParametersWithEmojis() {
+        // given
+        var request = new Request(HttpMethod.GET, "/test/path?q=%F0%9F%92%A1", null, null);
+        var classUnderTest = new HttpRequestImpl(request, null, null);
+        // when
+        var result = classUnderTest.extractQueryParameters();
+        // then
+        assertThat(result).containsEntry("q", "\uD83D\uDCA1");
+    }
+
+    @Test
+    void testExtractQueryParametersWhenURLHasNoQuery() {
+        // given
+        var request = new Request(HttpMethod.GET, "/test/path", null, null);
+        var classUnderTest = new HttpRequestImpl(request, null, null);
+        // when
+        var result = classUnderTest.extractQueryParameters();
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
     void testGetHeaders() {
         // given
         var headers = InsensitiveMap.from(Map.of("header1", "value1", "header2", "value2"));
@@ -109,7 +131,7 @@ class HttpRequestImplTest {
         var request = new Request(HttpMethod.GET, "/", null, null);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
-        var result = classUnderTest.request();
+        var result = classUnderTest.getRequest();
         // then
         assertThat(result).isEqualTo(request);
     }
@@ -120,7 +142,7 @@ class HttpRequestImplTest {
         var route = new Route(HttpMethod.GET, "/", null);
         var classUnderTest = new HttpRequestImpl(null, route, null);
         // when
-        var result = classUnderTest.route();
+        var result = classUnderTest.getRoute();
         // then
         assertThat(result).isEqualTo(route);
     }
@@ -128,7 +150,7 @@ class HttpRequestImplTest {
     @Test
     void testGetPathParameters() {
         // given
-        var pathParameters = InsensitiveMap.from(Map.of("param1", "value1", "param2", "value2"));
+        var pathParameters = Map.of("param1", "value1", "param2", "value2");
         var classUnderTest = new HttpRequestImpl(null, null, pathParameters);
         // when
         var result = classUnderTest.getPathParameters();

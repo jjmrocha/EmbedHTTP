@@ -4,7 +4,7 @@ import net.uiqui.embedhttp.api.ContentType;
 import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.api.impl.HttpRequestImpl;
 import net.uiqui.embedhttp.api.impl.HttpResponseImpl;
-import net.uiqui.embedhttp.api.impl.RouterImpl;
+import net.uiqui.embedhttp.routing.RouterImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +55,7 @@ public class RequestProcessor {
     }
 
     private HttpResponse execute(HttpRequestImpl httpRequest) {
-        var handler = httpRequest.route().getHandler();
+        var handler = httpRequest.getRoute().getHandler();
 
         try {
             return handler.handle(httpRequest);

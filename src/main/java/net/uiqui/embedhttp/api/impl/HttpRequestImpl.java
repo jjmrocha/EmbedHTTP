@@ -10,9 +10,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public record HttpRequestImpl(Request request,
-                              Route route,
-                              Map<String, String> pathParameters) implements HttpRequest {
+public class HttpRequestImpl implements HttpRequest {
+    private final Request request;
+    private final Route route;
+    private final Map<String, String> pathParameters;
+    private final Lazy<Map<String, String>> queryParameters = Lazy.of(this::extractQueryParameters);
+
+    public HttpRequestImpl(Request request, Route route, Map<String, String> pathParameters) {
+        this.request = request;
+        this.route = route;
+        this.pathParameters = pathParameters;
+    }
 
     @Override
     public HttpMethod getMethod() {
@@ -31,20 +39,7 @@ public record HttpRequestImpl(Request request,
 
     @Override
     public Map<String, String> getQueryParameters() {
-        var queryParameters = new HashMap<String, String>();
-        var queryParts = request.getQuery().split("&");
-
-        for (var part : queryParts) {
-            var keyValue = part.split("=");
-
-            if (keyValue.length == 2) {
-                var key = keyValue[0];
-                var value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                queryParameters.put(key, value);
-            }
-        }
-
-        return queryParameters;
+        return queryParameters.get();
     }
 
     @Override
@@ -60,5 +55,30 @@ public record HttpRequestImpl(Request request,
     @Override
     public Map<String, String> getPathParameters() {
         return pathParameters;
+    }
+
+    public Request getRequest() {
+        return request;
+    }
+
+    public Route getRoute() {
+        return route;
+    }
+
+    protected Map<String, String> extractQueryParameters() {
+        var parameters = new HashMap<String, String>();
+        var queryParts = request.getQuery().split("&");
+
+        for (var part : queryParts) {
+            var keyValue = part.split("=");
+
+            if (keyValue.length == 2) {
+                var key = keyValue[0];
+                var value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                parameters.put(key, value);
+            }
+        }
+
+        return parameters;
     }
 }
