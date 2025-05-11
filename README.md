@@ -123,13 +123,37 @@ public class Main {
 Once the server is running, you can access the endpoints using a web browser or tools like `curl`:
 
 ```bash
-# put request to update a resource
-curl -X PUT http://localhost:8080/resource/123?name=test
-# Output: Resource 123 name's will be updated to test.
-curl http://localhost:8080/health
-# Output: OK
-curl http://localhost:8080/metrics
-# Output: metric_name 123
+$ curl -v -X PUT http://localhost:8080/resource/123?name=test
+< HTTP/1.1 202 Accepted
+< Cache-Control: no-cache
+< Content-Length: 44
+< Content-Type: text/plain
+< Date: Sun, 11 May 2025 09:53:37 GMT
+< Connection: close
+< 
+Resource 123 name's will be updated to test.
+```
+
+```bash
+$ curl -v http://localhost:8080/health
+< HTTP/1.1 200 OK
+< Content-Length: 2
+< Content-Type: text/plain
+< Date: Sun, 11 May 2025 09:55:49 GMT
+< Connection: close
+< 
+OK
+```
+
+```bash
+$ curl -v http://localhost:8080/metrics
+< HTTP/1.1 200 OK
+< Content-Length: 15
+< Content-Type: text/plain
+< Date: Sun, 11 May 2025 09:57:24 GMT
+< Connection: close
+< 
+metric_name 123
 ```
 
 ## Benchmark
