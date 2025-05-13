@@ -41,7 +41,10 @@ class PathPatternCompilerTest {
                 Arguments.of("/v1", "/v1", "/v1", emptyMap()),
                 Arguments.of("/v1/resource", "/v1/resource", "/v1/resource", emptyMap()),
                 Arguments.of("/v1/resource/:id", "/v1/resource/(?<id>[^/]+)", "/v1/resource/123", Map.of("id", "123")),
-                Arguments.of("/v1/resource/:id/", "/v1/resource/(?<id>[^/]+)/", "/v1/resource/123/", Map.of("id", "123")),
+                Arguments.of("/v1/resource/:a1", "/v1/resource/(?<a1>[^/]+)", "/v1/resource/123", Map.of("a1", "123")),
+                Arguments.of("/v1/resource/:aZ", "/v1/resource/(?<aZ>[^/]+)", "/v1/resource/123", Map.of("aZ", "123")),
+                Arguments.of("/v1/resource/:Z2", "/v1/resource/(?<Z2>[^/]+)", "/v1/resource/123", Map.of("Z2", "123")),
+                Arguments.of("/v1/resource/:Za", "/v1/resource/(?<Za>[^/]+)", "/v1/resource/123", Map.of("Za", "123")),
                 Arguments.of("/v1/resource/:id/section", "/v1/resource/(?<id>[^/]+)/section", "/v1/resource/123/section", Map.of("id", "123")),
                 Arguments.of("/v1/resource/:id/section/:name", "/v1/resource/(?<id>[^/]+)/section/(?<name>[^/]+)",
                         "/v1/resource/123/section/abc", Map.of("id", "123", "name", "abc"))

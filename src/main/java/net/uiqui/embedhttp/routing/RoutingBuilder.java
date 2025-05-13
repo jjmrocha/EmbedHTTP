@@ -14,7 +14,8 @@ import static java.util.Collections.emptyList;
 public abstract class RoutingBuilder implements Router {
     private final Map<HttpMethod, List<Route>> routingTable = new EnumMap<>(HttpMethod.class);
 
-    private RoutingBuilder withRoute(HttpMethod method, String pathPattern, HttpRequestHandler handler) {
+    @Override
+    public RoutingBuilder withRoute(HttpMethod method, String pathPattern, HttpRequestHandler handler) {
         var route = new Route(method, pathPattern, handler);
         routingTable.computeIfAbsent(method, k -> new ArrayList<>())
                 .add(route);

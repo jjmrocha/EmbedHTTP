@@ -1,5 +1,6 @@
 package net.uiqui.embedhttp;
 
+import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
 import net.uiqui.embedhttp.routing.RouterImpl;
 
@@ -9,6 +10,9 @@ import net.uiqui.embedhttp.routing.RouterImpl;
  * This interface provides methods to register handlers for different HTTP methods (GET, POST, PUT, DELETE, HEAD, OPTIONS,
  * PATCH) with specified path patterns.
  * </p>
+ * <p>
+ * The path patterns can include parameters, which are indicated by a colon (:) followed by the parameter name,
+ * that can include letters and digits, but must start with a letter.
  * <p>
  * * Example usage:
  * <pre>
@@ -24,6 +28,16 @@ import net.uiqui.embedhttp.routing.RouterImpl;
  * </p>
  */
 public interface Router {
+    /**
+     * Registers a handler for a specific HTTP method and path pattern.
+     *
+     * @param method      The HTTP method.
+     * @param pathPattern The path pattern to match against incoming requests.
+     * @param handler     The handler to be invoked when a request matches the specified method and path pattern.
+     * @return The current Router instance for method chaining.
+     */
+    Router withRoute(HttpMethod method, String pathPattern, HttpRequestHandler handler);
+
     /**
      * Registers a handler for GET method and path pattern.
      *
