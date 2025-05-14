@@ -1,6 +1,6 @@
 package net.uiqui.embedhttp;
 
-import net.uiqui.embedhttp.server.ServerInstance;
+import net.uiqui.embedhttp.server.io.IOServer;
 
 /**
  * Interface for an HTTP server.
@@ -50,6 +50,6 @@ public interface HttpServer {
      * @return A new instance of the HTTP server.
      */
     static HttpServer newInstance(int port) {
-        return new ServerInstance(port, DEFAULT_BACKLOG);
+        return new IOServer(port, DEFAULT_BACKLOG);
     }
 }

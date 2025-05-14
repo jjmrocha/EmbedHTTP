@@ -1,7 +1,9 @@
-package net.uiqui.embedhttp.server;
+package net.uiqui.embedhttp.server.io;
 
 import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpMethod;
+import net.uiqui.embedhttp.server.InsensitiveMap;
+import net.uiqui.embedhttp.server.Request;
 
 import java.io.BufferedReader;
 import java.io.IOException;

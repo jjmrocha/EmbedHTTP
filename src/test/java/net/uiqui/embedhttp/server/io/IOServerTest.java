@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp.server;
+package net.uiqui.embedhttp.server.io;
 
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.ContentType;
@@ -12,11 +12,11 @@ import java.net.http.HttpClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
-class ServerInstanceTest {
+class IOServerTest {
     @Test
     void testStartWithRandomPort() throws Exception {
         // given
-        var classUnderTest = new ServerInstance(0, 10);
+        var classUnderTest = new IOServer(0, 10);
         var router = Router.newRouter()
                 .get("/", req -> HttpResponse.ok()
                         .setBody(ContentType.TEXT_PLAIN, "Hello World")
@@ -35,7 +35,7 @@ class ServerInstanceTest {
     @Test
     void testStartWithDefinedPort() throws Exception {
         // given
-        var classUnderTest = new ServerInstance(9876, 10);
+        var classUnderTest = new IOServer(9876, 10);
         var router = Router.newRouter()
                 .get("/", req -> HttpResponse.ok()
                         .setBody(ContentType.TEXT_PLAIN, "Hello World")
@@ -55,7 +55,7 @@ class ServerInstanceTest {
     @Test
     void testStop() throws Exception {
         // given
-        var classUnderTest = new ServerInstance(0, 10);
+        var classUnderTest = new IOServer(0, 10);
         var router = Router.newRouter()
                 .get("/", req -> HttpResponse.ok()
                         .setBody(ContentType.TEXT_PLAIN, "Hello World")
