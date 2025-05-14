@@ -1,17 +1,18 @@
-package net.uiqui.embedhttp.server;
+package net.uiqui.embedhttp.server.io;
 
 import net.uiqui.embedhttp.api.ContentType;
 import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.api.impl.HttpRequestImpl;
 import net.uiqui.embedhttp.api.impl.HttpResponseImpl;
 import net.uiqui.embedhttp.routing.RouterImpl;
+import net.uiqui.embedhttp.server.Request;
+import net.uiqui.embedhttp.server.ResponsePipeline;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ProtocolException;
 import java.net.Socket;
-import java.util.function.Function;
 
 public class RequestProcessor {
     private final RequestParser requestParser;
@@ -25,33 +26,38 @@ public class RequestProcessor {
     }
 
     public void process(Socket clientSocket) throws IOException {
-        var response = parse(clientSocket.getInputStream())
+        var response = ResponsePipeline.of(clientSocket.getInputStream())
+                .next(this::parse)
                 .next(this::route)
                 .then(this::execute);
         write(response, clientSocket.getOutputStream());
     }
 
-    private BreakableSequence<Request> parse(InputStream inputStream) throws IOException {
+    private ResponsePipeline<Request> parse(InputStream inputStream) {
         try {
             var request = requestParser.parseRequest(inputStream);
-            return new BreakableSequence<>(request, null);
+            return ResponsePipeline.of(request);
         } catch (ProtocolException e) {
             var response = HttpResponse.badRequest()
                     .setBody(ContentType.TEXT_PLAIN, "Bad Request: " + e.getMessage());
-            return new BreakableSequence<>(null, response);
+            return ResponsePipeline.reply(response);
+        } catch (IOException e) {
+            var response = HttpResponse.unexpectedError()
+                    .setBody(ContentType.TEXT_PLAIN, "Something went on our side");
+            return ResponsePipeline.reply(response);
         }
     }
 
-    private BreakableSequence<HttpRequestImpl> route(Request request) {
+    private ResponsePipeline<HttpRequestImpl> route(Request request) {
         var httpRequest = router.routeRequest(request);
 
         if (httpRequest == null) {
             var response = HttpResponse.notFound()
                     .setBody(ContentType.TEXT_PLAIN, "Not Found:" + request.getPath());
-            return new BreakableSequence<>(null, response);
+            return ResponsePipeline.reply(response);
         }
 
-        return new BreakableSequence<>(httpRequest, null);
+        return ResponsePipeline.of(httpRequest);
     }
 
     private HttpResponse execute(HttpRequestImpl httpRequest) {
@@ -68,27 +74,5 @@ public class RequestProcessor {
     private void write(HttpResponse response, OutputStream outputStream) throws IOException {
         var castedResponse = (HttpResponseImpl) response;
         responseWriter.writeResponse(outputStream, castedResponse);
-    }
-
-    private record BreakableSequence<T>(T value, HttpResponse response) {
-        public boolean hasResponse() {
-            return response != null;
-        }
-
-        public <R> BreakableSequence<R> next(Function<T, BreakableSequence<R>> mapper) {
-            if (hasResponse()) {
-                return new BreakableSequence<>(null, response);
-            }
-
-            return mapper.apply(value);
-        }
-
-        public HttpResponse then(Function<T, HttpResponse> mapper) {
-            if (hasResponse()) {
-                return response;
-            }
-
-            return mapper.apply(value);
-        }
     }
 }
