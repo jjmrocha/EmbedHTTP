@@ -1,9 +1,10 @@
-package net.uiqui.embedhttp.server;
+package net.uiqui.embedhttp.server.io;
 
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.ContentType;
 import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.routing.RouterImpl;
+import net.uiqui.embedhttp.server.Now;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

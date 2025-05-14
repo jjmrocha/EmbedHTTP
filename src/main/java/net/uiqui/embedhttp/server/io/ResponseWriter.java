@@ -1,7 +1,8 @@
-package net.uiqui.embedhttp.server;
+package net.uiqui.embedhttp.server.io;
 
 import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.impl.HttpResponseImpl;
+import net.uiqui.embedhttp.server.DateHeader;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp.server;
+package net.uiqui.embedhttp.server.io;
 
 import net.uiqui.embedhttp.api.HttpMethod;
 import org.junit.jupiter.api.Test;
