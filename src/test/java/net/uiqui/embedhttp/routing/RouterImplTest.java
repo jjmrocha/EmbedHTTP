@@ -14,7 +14,7 @@ class RouterImplTest {
     void testRouteRequestWithGetMethod() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.GET, "/get?name=value", null, null);
+        var request = new Request(HttpMethod.GET, "/get?name=value", null, null, false);
         // when
         var result = classUnderTest.routeRequest(request);
         // then
@@ -28,7 +28,7 @@ class RouterImplTest {
     void testRouteRequestWithPutMethodAndPathParameter() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.PUT, "/put/123", null, null);
+        var request = new Request(HttpMethod.PUT, "/put/123", null, null, false);
         // when
         var result = classUnderTest.routeRequest(request);
         // then
@@ -43,7 +43,7 @@ class RouterImplTest {
     void testRouteRequestWithPostMethod() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.POST, "/post", null, null);
+        var request = new Request(HttpMethod.POST, "/post", null, null, false);
         // when
         var result = classUnderTest.routeRequest(request);
         // then
@@ -54,7 +54,7 @@ class RouterImplTest {
     void testRouteRequestWithPutMethodAndNoPathParameter() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.PUT, "/put", null, null);
+        var request = new Request(HttpMethod.PUT, "/put", null, null, false);
         // when
         var result = classUnderTest.routeRequest(request);
         // then
@@ -65,7 +65,7 @@ class RouterImplTest {
     void testRouteRequestWithMultiplePathParameters() {
         // given
         var classUnderTest = buildRouterImpl();
-        var request = new Request(HttpMethod.POST, "/v1/resource/123/section/abc", null, null);
+        var request = new Request(HttpMethod.POST, "/v1/resource/123/section/abc", null, null, false);
         // when
         var result = classUnderTest.routeRequest(request);
         // then

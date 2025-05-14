@@ -13,15 +13,17 @@ import java.util.Map;
 
 public class RequestParser {
     private static final String TRANSFER_ENCODING_CHUNKED = "chunked";
+    private static final String CONNECTION_KEEP_ALIVE = "keep-alive";
+    private static final String CONNECTION_CLOSE = "close";
 
     public Request parseRequest(InputStream inputStream) throws IOException {
         var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         var requestLine = decodeRequestLine(reader);
         var headers = decodeRequestHeaders(reader);
         var body = decodeRequestBody(reader, headers);
+        var keepAlive = decodeKeepAlive(headers);
 
-        return new Request(requestLine.method(), requestLine.url(), headers, body);
-
+        return new Request(requestLine.method(), requestLine.url(), headers, body, keepAlive);
     }
 
     private RequestLine decodeRequestLine(BufferedReader reader) throws IOException {
@@ -74,6 +76,19 @@ public class RequestParser {
         }
 
         return ""; // No body or unsupported format
+    }
+
+    private boolean decodeKeepAlive(InsensitiveMap headers) {
+        var connectionHeader = headers.get(HttpHeader.CONNECTION.getValue());
+        if (connectionHeader == null) {
+            return true; // Default to keep-alive if no connection header is present
+        }
+
+        if (CONNECTION_KEEP_ALIVE.equalsIgnoreCase(connectionHeader)) {
+            return true;
+        }
+
+        return !CONNECTION_CLOSE.equalsIgnoreCase(connectionHeader);
     }
 
     private String readChunkedBody(BufferedReader reader) throws IOException {

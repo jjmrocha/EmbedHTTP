@@ -14,7 +14,7 @@ class HttpRequestImplTest {
     @Test
     void testGetMethod() {
         // given
-        var request = new Request(HttpMethod.GET, "/", null, null);
+        var request = new Request(HttpMethod.GET, "/", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getMethod();
@@ -25,7 +25,7 @@ class HttpRequestImplTest {
     @Test
     void testGetURL() {
         // given
-        var request = new Request(HttpMethod.GET, "/test", null, null);
+        var request = new Request(HttpMethod.GET, "/test", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getURL();
@@ -36,7 +36,7 @@ class HttpRequestImplTest {
     @Test
     void testGetPath() {
         // given
-        var request = new Request(HttpMethod.GET, "/test/path?name=value", null, null);
+        var request = new Request(HttpMethod.GET, "/test/path?name=value", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getPath();
@@ -47,7 +47,7 @@ class HttpRequestImplTest {
     @Test
     void testGetQueryParameters() {
         // given
-        var request = new Request(HttpMethod.GET, "/test/path?name1=value1&name2=val+2", null, null);
+        var request = new Request(HttpMethod.GET, "/test/path?name1=value1&name2=val+2", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getQueryParameters();
@@ -60,7 +60,7 @@ class HttpRequestImplTest {
     @Test
     void testGetQueryParametersWithEmojis() {
         // given
-        var request = new Request(HttpMethod.GET, "/test/path?q=%F0%9F%92%A1", null, null);
+        var request = new Request(HttpMethod.GET, "/test/path?q=%F0%9F%92%A1", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getQueryParameters();
@@ -71,7 +71,7 @@ class HttpRequestImplTest {
     @Test
     void testGetQueryParametersWhenURLHasNoQuery() {
         // given
-        var request = new Request(HttpMethod.GET, "/test/path", null, null);
+        var request = new Request(HttpMethod.GET, "/test/path", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getQueryParameters();
@@ -82,7 +82,7 @@ class HttpRequestImplTest {
     @Test
     void testExtractQueryParametersWithEmojis() {
         // given
-        var request = new Request(HttpMethod.GET, "/test/path?q=%F0%9F%92%A1", null, null);
+        var request = new Request(HttpMethod.GET, "/test/path?q=%F0%9F%92%A1", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.extractQueryParameters();
@@ -93,7 +93,7 @@ class HttpRequestImplTest {
     @Test
     void testExtractQueryParametersWhenURLHasNoQuery() {
         // given
-        var request = new Request(HttpMethod.GET, "/test/path", null, null);
+        var request = new Request(HttpMethod.GET, "/test/path", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.extractQueryParameters();
@@ -105,7 +105,7 @@ class HttpRequestImplTest {
     void testGetHeaders() {
         // given
         var headers = InsensitiveMap.from(Map.of("header1", "value1", "header2", "value2"));
-        var request = new Request(HttpMethod.GET, "/", headers, null);
+        var request = new Request(HttpMethod.GET, "/", headers, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getHeaders();
@@ -117,7 +117,7 @@ class HttpRequestImplTest {
     void testGetBody() {
         // given
         var body = "This is a test body";
-        var request = new Request(HttpMethod.POST, "/", null, body);
+        var request = new Request(HttpMethod.POST, "/", null, body, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getBody();
@@ -128,7 +128,7 @@ class HttpRequestImplTest {
     @Test
     void testRequest() {
         // given
-        var request = new Request(HttpMethod.GET, "/", null, null);
+        var request = new Request(HttpMethod.GET, "/", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getRequest();
