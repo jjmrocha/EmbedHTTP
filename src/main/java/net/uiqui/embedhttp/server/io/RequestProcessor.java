@@ -6,6 +6,7 @@ import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.api.impl.HttpRequestImpl;
 import net.uiqui.embedhttp.api.impl.HttpResponseImpl;
 import net.uiqui.embedhttp.routing.RouterImpl;
+import net.uiqui.embedhttp.server.ConnectionHeader;
 import net.uiqui.embedhttp.server.Request;
 import net.uiqui.embedhttp.server.RequestPipeline;
 
