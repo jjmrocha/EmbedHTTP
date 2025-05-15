@@ -74,7 +74,6 @@ class RequestProcessorTest {
                 Content-Length: 11\r
                 Content-Type: text/plain\r
                 Date: Sun, 01 Oct 2023 12:00:00 GMT\r
-                Connection: close\r
                 \r
                 Hello World""";
         var result = outputStream.toString();
@@ -99,7 +98,6 @@ class RequestProcessorTest {
                 Content-Length: 50\r
                 Content-Type: text/plain\r
                 Date: Sun, 01 Oct 2023 12:00:00 GMT\r
-                Connection: close\r
                 \r
                 Bad Request: Invalid request line: POST /noContent""";
         var result = outputStream.toString();
@@ -127,7 +125,6 @@ class RequestProcessorTest {
                 Content-Length: 19\r
                 Content-Type: text/plain\r
                 Date: Sun, 01 Oct 2023 12:00:00 GMT\r
-                Connection: close\r
                 \r
                 Not Found:/notFound""";
         var result = outputStream.toString();
@@ -155,9 +152,65 @@ class RequestProcessorTest {
                 Content-Length: 34\r
                 Content-Type: text/plain\r
                 Date: Sun, 01 Oct 2023 12:00:00 GMT\r
-                Connection: close\r
                 \r
                 Unexpected error executing request""";
+        var result = outputStream.toString();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void testWithConnectionClose() throws IOException {
+        // given
+        var inputStream = buildInputStream(
+                """
+                        GET /test HTTP/1.1\r
+                        Host: localhost\r
+                        User-Agent: TestClient\r
+                        Connection: close\r
+                        \r
+                        """
+        );
+        var outputStream = new ByteArrayOutputStream();
+        var clientSocket = buildClientSocket(inputStream, outputStream);
+        // when
+        classUnderTest.process(clientSocket);
+        // then
+        var expected = """
+                HTTP/1.1 200 OK\r
+                Connection: close\r
+                Content-Length: 11\r
+                Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
+                \r
+                Hello World""";
+        var result = outputStream.toString();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void testWithConnectionKeepAlive() throws IOException {
+        // given
+        var inputStream = buildInputStream(
+                """
+                        GET /test HTTP/1.1\r
+                        Host: localhost\r
+                        User-Agent: TestClient\r
+                        Connection: keep-alive\r
+                        \r
+                        """
+        );
+        var outputStream = new ByteArrayOutputStream();
+        var clientSocket = buildClientSocket(inputStream, outputStream);
+        // when
+        classUnderTest.process(clientSocket);
+        // then
+        var expected = """
+                HTTP/1.1 200 OK\r
+                Content-Length: 11\r
+                Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
+                \r
+                Hello World""";
         var result = outputStream.toString();
         assertThat(result).isEqualTo(expected);
     }

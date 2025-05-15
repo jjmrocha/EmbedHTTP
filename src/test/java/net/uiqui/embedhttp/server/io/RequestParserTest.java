@@ -4,6 +4,7 @@ import net.uiqui.embedhttp.api.HttpMethod;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.ProtocolException;
 import java.nio.charset.StandardCharsets;
 
@@ -31,6 +32,7 @@ class RequestParserTest {
         assertThat(result.getHeaders()).containsEntry("Host", "localhost");
         assertThat(result.getHeaders()).containsEntry("User-Agent", "TestClient");
         assertThat(result.getBody()).isEmpty();
+        assertThat(result.isKeepAlive()).isTrue();
     }
 
     @Test
@@ -51,6 +53,7 @@ class RequestParserTest {
         assertThat(result.getHeaders()).containsEntry("Host", "localhost");
         assertThat(result.getHeaders()).containsEntry("Content-Length", "11");
         assertThat(result.getBody()).isEqualTo("Hello World");
+        assertThat(result.isKeepAlive()).isTrue();
     }
 
     @Test
@@ -77,6 +80,49 @@ class RequestParserTest {
         assertThat(result.getHeaders()).containsEntry("Host", "localhost");
         assertThat(result.getHeaders()).containsEntry("Transfer-Encoding", "chunked");
         assertThat(result.getBody()).isEqualTo("Hello World");
+        assertThat(result.isKeepAlive()).isTrue();
+    }
+
+    @Test
+    void testKeepAliveHeader() throws Exception {
+        // given
+        var rawRequest = """
+                GET /test HTTP/1.1\r
+                Host: localhost\r
+                Connection: keep-alive\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(result.getUrl()).isEqualTo("/test");
+        assertThat(result.getHeaders()).containsEntry("Host", "localhost");
+        assertThat(result.getHeaders()).containsEntry("Connection", "keep-alive");
+        assertThat(result.getBody()).isEmpty();
+        assertThat(result.isKeepAlive()).isTrue();
+    }
+
+    @Test
+    void testCloseConnection() throws IOException {
+        // given
+        var rawRequest = """
+                GET /test HTTP/1.1\r
+                Host: localhost\r
+                Connection: close\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(result.getUrl()).isEqualTo("/test");
+        assertThat(result.getHeaders()).containsEntry("Host", "localhost");
+        assertThat(result.getHeaders()).containsEntry("Connection", "close");
+        assertThat(result.getBody()).isEmpty();
+        assertThat(result.isKeepAlive()).isFalse();
     }
 
     @Test

@@ -28,13 +28,13 @@ We can add EmbedHTTP to your project using Maven or Gradle.
 <dependency>
     <groupId>net.uiqui</groupId>
     <artifactId>embedhttp</artifactId>
-    <version>0.5.3</version>
+    <version>0.5.4</version>
 </dependency>
 ```
 
 #### Gradle
 ```groovy
-implementation 'net.uiqui:embedhttp:0.5.3'
+implementation 'net.uiqui:embedhttp:0.5.4'
 ```
 
 
@@ -129,7 +129,6 @@ $ curl -v -X PUT http://localhost:8080/resource/123?name=test
 < Content-Length: 44
 < Content-Type: text/plain
 < Date: Sun, 11 May 2025 09:53:37 GMT
-< Connection: close
 < 
 Resource 123 name's will be updated to test.
 ```
@@ -140,7 +139,6 @@ $ curl -v http://localhost:8080/health
 < Content-Length: 2
 < Content-Type: text/plain
 < Date: Sun, 11 May 2025 09:55:49 GMT
-< Connection: close
 < 
 OK
 ```
@@ -151,7 +149,6 @@ $ curl -v http://localhost:8080/metrics
 < Content-Length: 15
 < Content-Type: text/plain
 < Date: Sun, 11 May 2025 09:57:24 GMT
-< Connection: close
 < 
 metric_name 123
 ```
@@ -173,29 +170,56 @@ Sample Data: test-data.csv
 Configuration: beast-config.json
 Test duration: 120 seconds
 Number of concurrent requests: 2
+===== Preparing =====
+- Reading configuration
+- Loading request template
+- Loading data file
+===== Executing =====
+2025/05/15 09:07:56 [#...................] 5%
+2025/05/15 09:08:02 [##..................] 10%
+2025/05/15 09:08:08 [###.................] 15%
+2025/05/15 09:08:14 [####................] 20%
+2025/05/15 09:08:20 [#####...............] 25%
+2025/05/15 09:08:26 [######..............] 30%
+2025/05/15 09:08:32 [#######.............] 35%
+2025/05/15 09:08:38 [########............] 40%
+2025/05/15 09:08:44 [#########...........] 45%
+2025/05/15 09:08:50 [##########..........] 50%
+2025/05/15 09:08:56 [###########.........] 55%
+2025/05/15 09:09:02 [############........] 60%
+2025/05/15 09:09:08 [#############.......] 65%
+2025/05/15 09:09:14 [##############......] 70%
+2025/05/15 09:09:20 [###############.....] 75%
+2025/05/15 09:09:26 [################....] 80%
+2025/05/15 09:09:32 [#################...] 85%
+2025/05/15 09:09:38 [##################..] 90%
+2025/05/15 09:09:44 [###################.] 95%
+2025/05/15 09:09:50 [####################] 100%
 ===== Stats =====
-Executed requests: 1305289
-Time taken to complete: 2m0.000583417s
-Requests per second: 11657.6585
-Avg response time: 171.561µs
+Executed requests: 2783401
+Time taken to complete: 2m0.000279666s
+Requests per second: 24614.6951
+Avg response time: 81.252µs
 ===== Status 200 =====
-1305289 requests, with avg response time of 171.561µs
+2783401 requests, with avg response time of 81.252µs
 And the following distribution:
-- The fastest request took 72.917µs
-- 20% of requests under 134.959µs
-- 40% of requests under 149.542µs
-- 60% of requests under 164.792µs
-- 80% of requests under 187.291µs
-- 90% of requests under 208.417µs
-- 95% of requests under 233.708µs
-- 99% of requests under 330.542µs
-- The slowest request took 74.63675ms
+- The fastest request took 24.167µs
+- 20% of requests under 62.834µs
+- 40% of requests under 72.25µs
+- 60% of requests under 81.708µs
+- 80% of requests under 95.209µs
+- 90% of requests under 108.291µs
+- 95% of requests under 122.417µs
+- 99% of requests under 167.041µs
+- The slowest request took 23.134292ms
 ```
 
-Has expected EmbedHTTP doesn't have the same performance as Spring Boot:
-![Request per Second](https://raw.githubusercontent.com/jjmrocha/TestEmbedHTTP/refs/heads/main/Images/EmbedHTTP-0.5.1-RPS.png)
+Surprisingly, the EmbedHTTP 0.5.4 version performs on par with Spring Boot,
+achieving an impressive 91318K requests per second with an average response time of 700 microseconds,
+under a load of 64 concurrent requests:
+![Request per Second](https://raw.githubusercontent.com/jjmrocha/TestEmbedHTTP/refs/heads/main/Images/EmbedHTTP-0.5.4-RPS.png)
 
-![95% of requests under](https://raw.githubusercontent.com/jjmrocha/TestEmbedHTTP/refs/heads/main/Images/EmbedHTTP-0.5.1-95Percent.png)
+![95% of requests under](https://raw.githubusercontent.com/jjmrocha/TestEmbedHTTP/refs/heads/main/Images/EmbedHTTP-0.5.4-95Percent.png)
 
 ## Documentation
 The JavaDoc documentation for project is available on the [javadoc.io](https://www.javadoc.io/doc/net.uiqui/embedhttp/latest/index.html) site.

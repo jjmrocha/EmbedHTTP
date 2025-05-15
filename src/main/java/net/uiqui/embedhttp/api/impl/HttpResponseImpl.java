@@ -5,6 +5,7 @@ import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.api.HttpStatusCode;
 import net.uiqui.embedhttp.server.InsensitiveMap;
+import net.uiqui.embedhttp.server.io.ConnectionHeader;
 
 import java.util.Map;
 import java.util.Objects;
@@ -14,6 +15,7 @@ public class HttpResponseImpl implements HttpResponse {
     private final String statusMessage;
     private final Map<String, String> headers = new InsensitiveMap();
     private String body = null;
+    private boolean closeConnection = false;
 
     public HttpResponseImpl(HttpStatusCode statusCode) {
         this(statusCode.getCode(), statusCode.getReasonPhrase());
@@ -26,6 +28,10 @@ public class HttpResponseImpl implements HttpResponse {
 
     @Override
     public HttpResponse setHeader(HttpHeader name, String value) {
+        if (HttpHeader.CONNECTION == name) {
+            closeConnection = ConnectionHeader.CLOSE.getValue().equals(value);
+        }
+
         return setHeader(name.getValue(), value);
     }
 
@@ -66,5 +72,9 @@ public class HttpResponseImpl implements HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    public boolean closeConnection() {
+        return closeConnection;
     }
 }

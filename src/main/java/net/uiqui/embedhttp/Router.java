@@ -11,7 +11,7 @@ import net.uiqui.embedhttp.routing.RouterImpl;
  * PATCH) with specified path patterns.
  * </p>
  * <p>
- * The path patterns can include parameters, which are indicated by a colon (:) followed by the parameter name,
+ * The path patterns can include parameters, which are indicated by a colon ":" followed by the parameter name,
  * that can include letters and digits, but must start with a letter.
  * <p>
  * * Example usage:

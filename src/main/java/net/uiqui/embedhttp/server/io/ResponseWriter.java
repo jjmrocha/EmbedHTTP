@@ -38,13 +38,6 @@ public class ResponseWriter {
                 .append(dateHeader.getDateHeaderValue())
                 .append(CRLF);
 
-        // Write close connection header if not already set
-        if (!response.getHeaders().containsKey(HttpHeader.CONNECTION.getValue())) {
-            builder.append(HttpHeader.CONNECTION.getValue())
-                    .append(": close")
-                    .append(CRLF);
-        }
-
         // End of headers
         builder.append(CRLF);
 

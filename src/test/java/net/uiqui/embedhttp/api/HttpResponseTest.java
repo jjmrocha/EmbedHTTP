@@ -1,6 +1,7 @@
 package net.uiqui.embedhttp.api;
 
 import net.uiqui.embedhttp.api.impl.HttpResponseImpl;
+import net.uiqui.embedhttp.server.io.ConnectionHeader;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +21,7 @@ class HttpResponseTest {
         assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_TYPE.getValue(), ContentType.TEXT_PLAIN.getValue());
         assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_LENGTH.getValue(), "13");
         assertThat(classUnderTest.getBody()).isEqualTo("Hello, World!");
+        assertThat(classUnderTest.closeConnection()).isFalse();
     }
 
     @Test
@@ -33,6 +35,7 @@ class HttpResponseTest {
         assertThat(classUnderTest.getStatusMessage()).isEqualTo(HttpStatusCode.NO_CONTENT.getReasonPhrase());
         assertThat(classUnderTest.getHeaders()).isEmpty();
         assertThat(classUnderTest.getBody()).isNull();
+        assertThat(classUnderTest.closeConnection()).isFalse();
     }
 
     @Test
@@ -48,6 +51,7 @@ class HttpResponseTest {
         assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_TYPE.getValue(), ContentType.TEXT_PLAIN.getValue());
         assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_LENGTH.getValue(), "18");
         assertThat(classUnderTest.getBody()).isEqualTo("Resource not found");
+        assertThat(classUnderTest.closeConnection()).isFalse();
     }
 
     @Test
@@ -63,6 +67,7 @@ class HttpResponseTest {
         assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_TYPE.getValue(), ContentType.APPLICATION_JSON.getValue());
         assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_LENGTH.getValue(), "24");
         assertThat(classUnderTest.getBody()).isEqualTo("{\"error\": \"Bad Request\"}");
+        assertThat(classUnderTest.closeConnection()).isFalse();
     }
 
     @Test
@@ -78,5 +83,19 @@ class HttpResponseTest {
         assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_TYPE.getValue(), ContentType.TEXT_PLAIN.getValue());
         assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_LENGTH.getValue(), "28");
         assertThat(classUnderTest.getBody()).isEqualTo("An unexpected error occurred");
+        assertThat(classUnderTest.closeConnection()).isFalse();
+    }
+
+    @Test
+    void testCloseConnection() {
+        // when
+        var result = HttpResponse.noContent()
+                .setHeader(HttpHeader.CONNECTION, ConnectionHeader.CLOSE.getValue());
+        // then
+        assertThat(result).isInstanceOf(HttpResponseImpl.class);
+        var classUnderTest = (HttpResponseImpl) result;
+        assertThat(classUnderTest.getStatusCode()).isEqualTo(HttpStatusCode.NO_CONTENT.getCode());
+        assertThat(classUnderTest.getStatusMessage()).isEqualTo(HttpStatusCode.NO_CONTENT.getReasonPhrase());
+        assertThat(classUnderTest.closeConnection()).isTrue();
     }
 }

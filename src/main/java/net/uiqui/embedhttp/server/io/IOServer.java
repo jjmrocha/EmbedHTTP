@@ -13,6 +13,7 @@ import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.ERROR;
 import static java.lang.System.Logger.Level.INFO;
 
@@ -34,7 +35,7 @@ public class IOServer extends ServerInstance {
             var requestProcessor = new RequestProcessor(requestParser, responseWriter, (RouterImpl) router);
 
             stateMachine.setState(ServerState.RUNNING);
-            logger.log(INFO, () -> serverLogMessage("Started on port " + serverSocket.getLocalPort()));
+            logger.log(INFO, () -> serverLogMessage("Started on port %d", serverSocket.getLocalPort()));
 
             try (var executorService = Executors.newVirtualThreadPerTaskExecutor()) {
                 while (stateMachine.getCurrentState() == ServerState.RUNNING) {
@@ -51,7 +52,7 @@ public class IOServer extends ServerInstance {
     private void acceptAndProcess(ServerSocket serverSocket, ExecutorService executorService, RequestProcessor requestProcessor) throws IOException {
         try {
             var clientSocket = serverSocket.accept();
-            handleRequest(clientSocket, executorService, requestProcessor);
+            executorService.submit(() -> handleRequest(clientSocket, requestProcessor));
         } catch (SocketTimeoutException e) {
             // Ignore timeout exception
         } catch (SocketException e) {
@@ -59,13 +60,25 @@ public class IOServer extends ServerInstance {
         }
     }
 
-    private void handleRequest(Socket clientSocket, ExecutorService executorService, RequestProcessor requestProcessor) {
-        executorService.submit(() -> {
-            try (clientSocket) {
-                requestProcessor.process(clientSocket);
-            } catch (Exception e) {
-                logger.log(ERROR, () -> serverLogMessage("Error processing request"), e);
+    private void handleRequest(Socket clientSocket, RequestProcessor requestProcessor) {
+        var clientAddress = clientSocket.getInetAddress().getHostAddress();
+        var clientPort = clientSocket.getPort();
+
+        logger.log(DEBUG, () -> serverLogMessage("Client(%s:%d): Connected", clientAddress, clientPort));
+
+        try (clientSocket) {
+            clientSocket.setSoTimeout(SO_TIMEOUT);
+            var keepAlive = true;
+
+            while (keepAlive && stateMachine.getCurrentState() == ServerState.RUNNING) {
+                keepAlive = requestProcessor.process(clientSocket);
             }
-        });
+
+            logger.log(DEBUG, () -> serverLogMessage("Client(%s:%d): Connection closed", clientAddress, clientPort));
+        } catch (ClientDisconnectedException e) {
+            logger.log(DEBUG, () -> serverLogMessage("Client(%s:%d): Disconnected", clientAddress, clientPort));
+        } catch (Exception e) {
+            logger.log(ERROR, () -> serverLogMessage("Client(%s:%d): Error processing request"), e);
+        }
     }
 }

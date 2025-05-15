@@ -10,13 +10,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ProtocolException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import static net.uiqui.embedhttp.server.io.ConnectionHeader.CLOSE;
+import static net.uiqui.embedhttp.server.io.ConnectionHeader.KEEP_ALIVE;
+
 public class RequestParser {
     private static final String TRANSFER_ENCODING_CHUNKED = "chunked";
-    private static final String CONNECTION_KEEP_ALIVE = "keep-alive";
-    private static final String CONNECTION_CLOSE = "close";
 
     public Request parseRequest(InputStream inputStream) throws IOException {
         var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -29,10 +31,7 @@ public class RequestParser {
     }
 
     private RequestLine decodeRequestLine(BufferedReader reader) throws IOException {
-        var line = reader.readLine();
-        if (line == null || line.isEmpty()) {
-            throw new ProtocolException("Invalid request line: line is null or empty");
-        }
+        var line = readRequestLine(reader);
 
         var parts = line.split(" ", 3);
         if (parts.length != 3) {
@@ -47,6 +46,23 @@ public class RequestParser {
         var url = parts[1];
         var version = parts[2];
         return new RequestLine(method, url, version);
+    }
+
+    private static String readRequestLine(BufferedReader reader) throws IOException {
+        try {
+            var line = reader.readLine();
+            if (line == null) {
+                throw new ClientDisconnectedException();
+            }
+
+            if (line.isEmpty()) {
+                throw new ProtocolException("Invalid request line: line is empty");
+            }
+
+            return line;
+        } catch (SocketTimeoutException e) {
+            throw new ClientDisconnectedException(e);
+        }
     }
 
     private InsensitiveMap decodeRequestHeaders(BufferedReader reader) throws IOException {
@@ -86,11 +102,11 @@ public class RequestParser {
             return true; // Default to keep-alive if no connection header is present
         }
 
-        if (CONNECTION_KEEP_ALIVE.equalsIgnoreCase(connectionHeader)) {
+        if (KEEP_ALIVE.getValue().equalsIgnoreCase(connectionHeader)) {
             return true;
         }
 
-        return !CONNECTION_CLOSE.equalsIgnoreCase(connectionHeader);
+        return !CLOSE.getValue().equalsIgnoreCase(connectionHeader);
     }
 
     private String readChunkedBody(BufferedReader reader) throws IOException {

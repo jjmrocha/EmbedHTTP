@@ -87,7 +87,11 @@ public abstract class ServerInstance implements HttpServer {
         return instancePort.get();
     }
 
-    protected String serverLogMessage(String message) {
-        return String.format("Server(%d): %s", port, message);
+    protected String serverLogMessage(String message, Object... args) {
+        var finalMessage = args.length > 0
+                ? String.format(message, args)
+                : message;
+
+        return String.format("Server(%d): %s", port, finalMessage);
     }
 }
