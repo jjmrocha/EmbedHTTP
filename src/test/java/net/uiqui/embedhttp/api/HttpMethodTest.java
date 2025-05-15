@@ -21,6 +21,7 @@ class HttpMethodTest {
     private static Stream<Arguments> httpMethods() {
         return Stream.of(
                 // string, value
+                Arguments.of("invalid", null),
                 Arguments.of("get", HttpMethod.GET),
                 Arguments.of("GET", HttpMethod.GET),
                 Arguments.of("post", HttpMethod.POST),

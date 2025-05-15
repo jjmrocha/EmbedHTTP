@@ -1,7 +1,7 @@
 package net.uiqui.embedhttp.api;
 
 import net.uiqui.embedhttp.api.impl.HttpResponseImpl;
-import net.uiqui.embedhttp.server.io.ConnectionHeader;
+import net.uiqui.embedhttp.server.ConnectionHeader;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
