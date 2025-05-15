@@ -1,4 +1,4 @@
-package net.uiqui.embedhttp.server.io;
+package net.uiqui.embedhttp.server;
 
 public enum ConnectionHeader {
     KEEP_ALIVE("keep-alive"),

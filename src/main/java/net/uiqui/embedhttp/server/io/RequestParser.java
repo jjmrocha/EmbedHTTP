@@ -14,8 +14,8 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import static net.uiqui.embedhttp.server.io.ConnectionHeader.CLOSE;
-import static net.uiqui.embedhttp.server.io.ConnectionHeader.KEEP_ALIVE;
+import static net.uiqui.embedhttp.server.ConnectionHeader.CLOSE;
+import static net.uiqui.embedhttp.server.ConnectionHeader.KEEP_ALIVE;
 
 public class RequestParser {
     private static final String TRANSFER_ENCODING_CHUNKED = "chunked";

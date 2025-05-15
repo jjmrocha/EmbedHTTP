@@ -5,7 +5,7 @@ import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpResponse;
 import net.uiqui.embedhttp.api.HttpStatusCode;
 import net.uiqui.embedhttp.server.InsensitiveMap;
-import net.uiqui.embedhttp.server.io.ConnectionHeader;
+import net.uiqui.embedhttp.server.ConnectionHeader;
 
 import java.util.Map;
 import java.util.Objects;
