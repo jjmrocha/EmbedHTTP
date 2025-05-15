@@ -5,6 +5,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 plugins {
     id("java")
     `java-library`
+    jacoco
     id("com.vanniktech.maven.publish") version "0.31.0"
 }
 
@@ -61,6 +62,17 @@ tasks.test {
         showCauses = true
         showStackTraces = true
     }
+
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = true
+    }
+
+    dependsOn(tasks.test) // tests are required to run before generating the report
 }
 
 mavenPublishing {
