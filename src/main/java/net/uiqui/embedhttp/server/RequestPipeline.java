@@ -6,46 +6,46 @@ import java.io.IOException;
 
 public class RequestPipeline<T> {
     private final T value;
-    private final HttpResponse response;
+    private final HttpResponse error;
 
     private RequestPipeline(T value, HttpResponse response) {
         this.value = value;
-        this.response = response;
+        this.error = response;
     }
 
     public T getValue() {
         return value;
     }
 
-    public HttpResponse getResponse() {
-        return response;
+    public HttpResponse getError() {
+        return error;
     }
 
-    private boolean hasResponse() {
-        return response != null;
+    private boolean hasError() {
+        return error != null;
     }
 
     public <R> RequestPipeline<R> map(ThrowingFunction<T, RequestPipeline<R>> mapper) throws IOException {
-        if (hasResponse()) {
-            return RequestPipeline.reply(response);
+        if (hasError()) {
+            return RequestPipeline.error(error);
         }
 
         return mapper.apply(value);
     }
 
     public HttpResponse then(ThrowingFunction<T, HttpResponse> mapper) throws IOException {
-        if (hasResponse()) {
-            return response;
+        if (hasError()) {
+            return error;
         }
 
         return mapper.apply(value);
     }
 
-    public static <T> RequestPipeline<T> of(T value) {
+    public static <T> RequestPipeline<T> value(T value) {
         return new RequestPipeline<>(value, null);
     }
 
-    public static <T> RequestPipeline<T> reply(HttpResponse response) {
+    public static <T> RequestPipeline<T> error(HttpResponse response) {
         return new RequestPipeline<>(null, response);
     }
 

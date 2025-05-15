@@ -13,51 +13,51 @@ class RequestPipelineTest {
         // given
         var value = "test";
         // when
-        var result = RequestPipeline.of(value);
+        var result = RequestPipeline.value(value);
         // then
         assertThat(result.getValue()).isEqualTo(value);
-        assertThat(result.getResponse()).isNull();
+        assertThat(result.getError()).isNull();
     }
 
     @Test
-    void testReply() {
+    void testError() {
         // given
         var response = HttpResponse.noContent();
         // when
-        var result = RequestPipeline.reply(response);
+        var result = RequestPipeline.error(response);
         // then
         assertThat(result.getValue()).isNull();
-        assertThat(result.getResponse()).isEqualTo(response);
+        assertThat(result.getError()).isEqualTo(response);
     }
 
     @Test
-    void testMapWithResponse() throws IOException {
+    void testMapWithError() throws IOException {
         // given
         var response = HttpResponse.noContent();
-        var pipeline = RequestPipeline.reply(response);
+        var pipeline = RequestPipeline.error(response);
         // when
-        var result = pipeline.map(value -> RequestPipeline.of("next"));
+        var result = pipeline.map(value -> RequestPipeline.value("next"));
         // then
         assertThat(result.getValue()).isNull();
-        assertThat(result.getResponse()).isEqualTo(response);
+        assertThat(result.getError()).isEqualTo(response);
     }
 
     @Test
     void testMapWithValue() throws IOException {
         // given
-        var pipeline = RequestPipeline.of("test");
+        var pipeline = RequestPipeline.value("test");
         // when
-        var result = pipeline.map(value -> RequestPipeline.of("next"));
+        var result = pipeline.map(value -> RequestPipeline.value("next"));
         // then
         assertThat(result.getValue()).isEqualTo("next");
-        assertThat(result.getResponse()).isNull();
+        assertThat(result.getError()).isNull();
     }
 
     @Test
-    void testThenWithResponse() throws IOException {
+    void testThenWithError() throws IOException {
         // given
         var response = HttpResponse.noContent();
-        var pipeline = RequestPipeline.reply(response);
+        var pipeline = RequestPipeline.error(response);
         // when
         var result = pipeline.then(value -> HttpResponse.ok());
         // then
@@ -67,7 +67,7 @@ class RequestPipelineTest {
     @Test
     void testThenWithValue() throws IOException {
         // given
-        var pipeline = RequestPipeline.of("test");
+        var pipeline = RequestPipeline.value("test");
         var response = HttpResponse.ok();
         // when
         var result = pipeline.then(value -> response);

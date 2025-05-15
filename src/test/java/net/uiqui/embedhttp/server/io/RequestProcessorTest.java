@@ -95,6 +95,7 @@ class RequestProcessorTest {
         // then
         var expected = """
                 HTTP/1.1 400 Bad Request\r
+                Connection: close\r
                 Content-Length: 50\r
                 Content-Type: text/plain\r
                 Date: Sun, 01 Oct 2023 12:00:00 GMT\r

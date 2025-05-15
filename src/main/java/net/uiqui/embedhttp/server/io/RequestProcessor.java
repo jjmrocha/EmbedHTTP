@@ -28,7 +28,7 @@ public class RequestProcessor {
     }
 
     public boolean process(Socket clientSocket) throws IOException {
-        var response = RequestPipeline.of(clientSocket.getInputStream())
+        var response = RequestPipeline.value(clientSocket.getInputStream())
                 .map(this::parse)
                 .map(this::route)
                 .then(this::execute);
@@ -45,17 +45,19 @@ public class RequestProcessor {
     private RequestPipeline<Request> parse(InputStream inputStream) throws ClientDisconnectedException {
         try {
             var request = requestParser.parseRequest(inputStream);
-            return RequestPipeline.of(request);
+            return RequestPipeline.value(request);
         } catch (ProtocolException e) {
             var response = HttpResponse.badRequest()
+                    .setHeader(HttpHeader.CONNECTION, ConnectionHeader.CLOSE.getValue())
                     .setBody(ContentType.TEXT_PLAIN, "Bad Request: " + e.getMessage());
-            return RequestPipeline.reply(response);
+            return RequestPipeline.error(response);
         } catch (ClientDisconnectedException e) {
             throw e;
         } catch (IOException e) {
             var response = HttpResponse.unexpectedError()
+                    .setHeader(HttpHeader.CONNECTION, ConnectionHeader.CLOSE.getValue())
                     .setBody(ContentType.TEXT_PLAIN, "Something went on our side");
-            return RequestPipeline.reply(response);
+            return RequestPipeline.error(response);
         }
     }
 
@@ -65,10 +67,10 @@ public class RequestProcessor {
         if (httpRequest == null) {
             var response = HttpResponse.notFound()
                     .setBody(ContentType.TEXT_PLAIN, "Not Found:" + request.getPath());
-            return RequestPipeline.reply(response);
+            return RequestPipeline.error(response);
         }
 
-        return RequestPipeline.of(httpRequest);
+        return RequestPipeline.value(httpRequest);
     }
 
     private HttpResponse execute(HttpRequestImpl httpRequest) {
