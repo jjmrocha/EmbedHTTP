@@ -44,7 +44,6 @@ class ResponseWriterTest {
         var expected = """
                 HTTP/1.1 204 No Content\r
                 Date: Sun, 01 Oct 2023 12:00:00 GMT\r
-                Connection: close\r
                 \r
                 """;
         var result = outputStream.toString();
@@ -64,7 +63,6 @@ class ResponseWriterTest {
                 Content-Length: 11\r
                 Content-Type: text/plain\r
                 Date: Sun, 01 Oct 2023 12:00:00 GMT\r
-                Connection: close\r
                 \r
                 Hello World""";
         var result = outputStream.toString();

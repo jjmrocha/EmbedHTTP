@@ -30,3 +30,4 @@ replay_pid*
 .gradle/
 build/
 .DS_Store
+examples/readme/readme.iml

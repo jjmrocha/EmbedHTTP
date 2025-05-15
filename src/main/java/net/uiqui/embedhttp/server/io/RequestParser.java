@@ -10,8 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ProtocolException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
+import static net.uiqui.embedhttp.server.io.ConnectionHeader.CLOSE;
+import static net.uiqui.embedhttp.server.io.ConnectionHeader.KEEP_ALIVE;
 
 public class RequestParser {
     private static final String TRANSFER_ENCODING_CHUNKED = "chunked";
@@ -21,16 +25,13 @@ public class RequestParser {
         var requestLine = decodeRequestLine(reader);
         var headers = decodeRequestHeaders(reader);
         var body = decodeRequestBody(reader, headers);
+        var keepAlive = decodeKeepAlive(headers);
 
-        return new Request(requestLine.method(), requestLine.url(), headers, body);
-
+        return new Request(requestLine.method(), requestLine.url(), headers, body, keepAlive);
     }
 
     private RequestLine decodeRequestLine(BufferedReader reader) throws IOException {
-        var line = reader.readLine();
-        if (line == null || line.isEmpty()) {
-            throw new ProtocolException("Invalid request line: line is null or empty");
-        }
+        var line = readRequestLine(reader);
 
         var parts = line.split(" ", 3);
         if (parts.length != 3) {
@@ -45,6 +46,23 @@ public class RequestParser {
         var url = parts[1];
         var version = parts[2];
         return new RequestLine(method, url, version);
+    }
+
+    private static String readRequestLine(BufferedReader reader) throws IOException {
+        try {
+            var line = reader.readLine();
+            if (line == null) {
+                throw new ClientDisconnectedException();
+            }
+
+            if (line.isEmpty()) {
+                throw new ProtocolException("Invalid request line: line is empty");
+            }
+
+            return line;
+        } catch (SocketTimeoutException e) {
+            throw new ClientDisconnectedException(e);
+        }
     }
 
     private InsensitiveMap decodeRequestHeaders(BufferedReader reader) throws IOException {
@@ -76,6 +94,19 @@ public class RequestParser {
         }
 
         return ""; // No body or unsupported format
+    }
+
+    private boolean decodeKeepAlive(InsensitiveMap headers) {
+        var connectionHeader = headers.get(HttpHeader.CONNECTION.getValue());
+        if (connectionHeader == null) {
+            return true; // Default to keep-alive if no connection header is present
+        }
+
+        if (KEEP_ALIVE.getValue().equalsIgnoreCase(connectionHeader)) {
+            return true;
+        }
+
+        return !CLOSE.getValue().equalsIgnoreCase(connectionHeader);
     }
 
     private String readChunkedBody(BufferedReader reader) throws IOException {

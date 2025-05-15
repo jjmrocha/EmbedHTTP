@@ -35,7 +35,7 @@ class HttpRequestTest {
     @Test
     void testGetQueryParameterWhenParameterExists() {
         // given
-        var request = new Request(HttpMethod.GET, "/resource?name=test", null, null);
+        var request = new Request(HttpMethod.GET, "/resource?name=test", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getQueryParameter("name");
@@ -46,7 +46,7 @@ class HttpRequestTest {
     @Test
     void testGetQueryParameterWhenParameterDoNotExists() {
         // given
-        var request = new Request(HttpMethod.GET, "/resource?name=test", null, null);
+        var request = new Request(HttpMethod.GET, "/resource?name=test", null, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getQueryParameter("other");
@@ -58,7 +58,7 @@ class HttpRequestTest {
     void testGetHeaderWhenHeaderExistsInLowerCase() {
         // given
         var headers = InsensitiveMap.from(Map.of("header", "value"));
-        var request = new Request(HttpMethod.GET, "/resource", headers, null);
+        var request = new Request(HttpMethod.GET, "/resource", headers, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getHeader("header");
@@ -70,7 +70,7 @@ class HttpRequestTest {
     void testGetHeaderWhenHeaderExistsInUpperCase() {
         // given
         var headers = InsensitiveMap.from(Map.of("header", "value"));
-        var request = new Request(HttpMethod.GET, "/resource", headers, null);
+        var request = new Request(HttpMethod.GET, "/resource", headers, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getHeader("HEADER");
@@ -82,7 +82,7 @@ class HttpRequestTest {
     void testGetHeaderWhenHeaderDoNotExists() {
         // given
         var headers = InsensitiveMap.from(Map.of("header", "value"));
-        var request = new Request(HttpMethod.GET, "/resource", headers, null);
+        var request = new Request(HttpMethod.GET, "/resource", headers, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getHeader("other");
@@ -94,7 +94,7 @@ class HttpRequestTest {
     void testGetContentType() {
         // given
         var headers = InsensitiveMap.from(Map.of(HttpHeader.CONTENT_TYPE.getValue(), "application/json"));
-        var request = new Request(HttpMethod.GET, "/resource", headers, null);
+        var request = new Request(HttpMethod.GET, "/resource", headers, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getContentType();
@@ -106,7 +106,7 @@ class HttpRequestTest {
     void testGetAccept() {
         // given
         var headers = InsensitiveMap.from(Map.of(HttpHeader.ACCEPT.getValue(), "application/json"));
-        var request = new Request(HttpMethod.GET, "/resource", headers, null);
+        var request = new Request(HttpMethod.GET, "/resource", headers, null, false);
         var classUnderTest = new HttpRequestImpl(request, null, null);
         // when
         var result = classUnderTest.getAccept();

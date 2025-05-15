@@ -11,8 +11,9 @@ public class Request {
     private final String body;
     private final String path;
     private final String query;
+    private final boolean keepAlive;
 
-    public Request(HttpMethod method, String url, InsensitiveMap headers, String body) {
+    public Request(HttpMethod method, String url, InsensitiveMap headers, String body, boolean keepAlive) {
         this.method = method;
         this.url = url;
         this.headers = headers;
@@ -27,6 +28,8 @@ public class Request {
             this.path = url;
             this.query = "";
         }
+
+        this.keepAlive = keepAlive;
     }
 
     public HttpMethod getMethod() {
@@ -51,5 +54,9 @@ public class Request {
 
     public String getQuery() {
         return query;
+    }
+
+    public boolean isKeepAlive() {
+        return keepAlive;
     }
 }

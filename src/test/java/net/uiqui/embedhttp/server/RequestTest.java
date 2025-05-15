@@ -18,8 +18,9 @@ class RequestTest {
         var method = HttpMethod.GET;
         var headers = InsensitiveMap.from(Map.of("header1", "value1", "header2", "value2"));
         var body = "request body";
+        var keepAlive = true;
         // when
-        var result = new Request(method, url, headers, body);
+        var result = new Request(method, url, headers, body, keepAlive);
         // then
         assertThat(result.getMethod()).isEqualTo(method);
         assertThat(result.getUrl()).isEqualTo(url);
@@ -27,6 +28,7 @@ class RequestTest {
         assertThat(result.getBody()).isEqualTo(body);
         assertThat(result.getPath()).isEqualTo(path);
         assertThat(result.getQuery()).isEqualTo(query);
+        assertThat(result.isKeepAlive()).isEqualTo(keepAlive);
     }
 
     private static Stream<Arguments> requestUrls() {

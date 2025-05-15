@@ -2,6 +2,8 @@ package net.uiqui.embedhttp.examples.readme;
 
 import net.uiqui.embedhttp.HttpServer;
 
+import java.util.logging.LogManager;
+
 public class Main {
     public static void main(String[] args) throws Exception {
         var router = ExampleRoutes.createRouter();
