@@ -10,7 +10,7 @@ import net.uiqui.embedhttp.server.io.IOServer;
  * </p>
  */
 public interface HttpServer {
-    int DEFAULT_BACKLOG = 100;
+    int DEFAULT_BACKLOG = 256;
 
     /**
      * Starts the HTTP server with the specified router.
