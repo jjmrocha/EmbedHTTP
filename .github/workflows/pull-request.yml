@@ -29,4 +29,4 @@ jobs:
       run: ./gradlew test
 
     - name: jacoco-summary
-      uses: jjmrocha/jacoco-summary@v1.1.0
+      uses: jjmrocha/jacoco-summary@v1.1.1
