@@ -28,5 +28,5 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew test
 
-    - name: Generate JaCoCo Summary
-      uses: jjmrocha/jacoco-summary@v1
+    - name: jacoco-summary
+      uses: jjmrocha/jacoco-summary@v1.1.0
