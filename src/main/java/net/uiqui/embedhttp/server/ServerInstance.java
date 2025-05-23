@@ -92,6 +92,6 @@ public abstract class ServerInstance implements HttpServer {
                 ? String.format(message, args)
                 : message;
 
-        return String.format("Server(%d): %s", port, finalMessage);
+        return String.format("Instance(%d): %s", port, finalMessage);
     }
 }

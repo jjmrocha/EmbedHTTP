@@ -15,7 +15,7 @@ class ServerInstanceTest {
         // when
         var result = classUnderTest.serverLogMessage(message);
         // then
-        assertThat(result).isEqualTo("Server(0): test");
+        assertThat(result).isEqualTo("Instance(0): test");
     }
 
     @Test
@@ -27,6 +27,6 @@ class ServerInstanceTest {
         // when
         var result = classUnderTest.serverLogMessage(message, params1, params2);
         // then
-        assertThat(result).isEqualTo("Server(0): test param1 10");
+        assertThat(result).isEqualTo("Instance(0): test param1 10");
     }
 }

@@ -26,7 +26,8 @@ public class IOServer extends ServerInstance {
 
     @Override
     public void listenAndServe(Router router) {
-        try (var serverSocket = new ServerSocket(port, backlog)) {
+        try (var serverSocket = new ServerSocket(port, backlog);
+             var executorService = Executors.newVirtualThreadPerTaskExecutor()) {
             instancePort.set(serverSocket.getLocalPort());
             serverSocket.setSoTimeout(SO_TIMEOUT);
 
@@ -37,10 +38,8 @@ public class IOServer extends ServerInstance {
             stateMachine.setState(ServerState.RUNNING);
             logger.log(INFO, () -> serverLogMessage("Started on port %d", serverSocket.getLocalPort()));
 
-            try (var executorService = Executors.newVirtualThreadPerTaskExecutor()) {
-                while (stateMachine.getCurrentState() == ServerState.RUNNING) {
-                    acceptAndProcess(serverSocket, executorService, requestProcessor);
-                }
+            while (stateMachine.getCurrentState() == ServerState.RUNNING) {
+                acceptAndProcess(serverSocket, executorService, requestProcessor);
             }
         } catch (Exception e) {
             logger.log(ERROR, () -> serverLogMessage("Error starting server"), e);
