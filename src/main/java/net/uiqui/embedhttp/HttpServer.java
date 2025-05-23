@@ -31,6 +31,7 @@ public interface HttpServer {
 
     /**
      * Retrieves the port on which the server is running.
+     * If the server is not running, this method will return -1.
      *
      * @return The port number.
      */
