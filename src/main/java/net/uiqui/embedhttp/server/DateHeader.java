@@ -1,10 +1,13 @@
 package net.uiqui.embedhttp.server;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DateHeader {
@@ -13,20 +16,47 @@ public class DateHeader {
 
     private static final DateTimeFormatter DATE_HEADER_FORMAT = DateTimeFormatter.ofPattern(RFC_1123_DATE_TIME, Locale.ENGLISH)
             .withZone(ZoneId.of(GMT));
+    private static final ZonedDateTime EPOCH = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.of(GMT));
 
-    private final LastDateHolder cache = new LastDateHolder();
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Lock readLock = lock.readLock();
+    private final Lock writeLock = lock.writeLock();
+
+    private FormatedDate lastFormattedDate = new FormatedDate(EPOCH, "");
 
     public String getDateHeaderValue() {
         var now = Now.asZonedDateTime().truncatedTo(ChronoUnit.SECONDS);
-        var lastFormatedDate = cache.get();
 
-        if (lastFormatedDate == null || !now.equals(lastFormatedDate.time)) {
-            var formattedDate = formatDate(now);
-            cache.set(new FormatedDate(now, formattedDate));
-            return formattedDate;
+        var currentFormattedDate = getCurrentFormattedDate();
+        if (now.equals(lastFormattedDate.time())) {
+            return currentFormattedDate.formatted();
         }
 
-        return lastFormatedDate.formatted;
+        return computeAndReturn(now);
+    }
+
+    private FormatedDate getCurrentFormattedDate() {
+        readLock.lock();
+        try {
+            return lastFormattedDate;
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    private String computeAndReturn(ZonedDateTime time) {
+        writeLock.lock();
+        try {
+            if (lastFormattedDate.time().equals(time)) {
+                return lastFormattedDate.formatted();
+            }
+
+            var formatted = formatDate(time);
+            lastFormattedDate = new FormatedDate(time, formatted);
+            return formatted;
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     protected String formatDate(ZonedDateTime date) {
@@ -34,31 +64,5 @@ public class DateHeader {
     }
 
     private record FormatedDate(ZonedDateTime time, String formatted) {
-    }
-
-    private static class LastDateHolder {
-        private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-        private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
-        private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
-
-        private FormatedDate lastFormatedDate = null;
-
-        public FormatedDate get() {
-            readLock.lock();
-            try {
-                return lastFormatedDate;
-            } finally {
-                readLock.unlock();
-            }
-        }
-
-        public void set(FormatedDate formatedDate) {
-            writeLock.lock();
-            try {
-                lastFormatedDate = formatedDate;
-            } finally {
-                writeLock.unlock();
-            }
-        }
     }
 }
