@@ -221,6 +221,46 @@ under a load of 64 concurrent requests:
 
 ![95% of requests under](https://raw.githubusercontent.com/jjmrocha/TestEmbedHTTP/refs/heads/main/Images/EmbedHTTP-0.5.4-95Percent.png)
 
+## How it works
+
+The following sequence diagram illustrates the flow of a request through the EmbedHTTP server:
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server Thread
+    participant Virtual Thread
+    participant Request Handler
+
+    activate Client
+    Client->>Server Thread: Open Connection
+    activate Server Thread
+    Server Thread->>Server Thread: Accept Connection
+    Server Thread->>Virtual Thread: New
+    activate Virtual Thread
+    deactivate Server Thread
+    loop While connection is open
+        Client->>Virtual Thread: HTTP Request
+        Virtual Thread->>Virtual Thread: Parse Request
+        alt If error parsing request
+            Virtual Thread->>Client: Send Error Response
+        else If request is valid    
+            Virtual Thread->>Virtual Thread: Find route handler
+            alt If route handler not found
+                Virtual Thread->>Client: Send 404 Not Found Response
+            else If route handler found
+                Virtual Thread->>Request Handler: Call Request Handler
+                activate Request Handler
+                Request Handler-->>Request Handler: Process Request
+                Request Handler-->>Virtual Thread: Return Response
+                deactivate Request Handler
+                Virtual Thread->>Client: Send Response
+            end
+        end
+    end
+    deactivate Virtual Thread
+    deactivate Client
+```
+
 ## Documentation
 The JavaDoc documentation for project is available on the [javadoc.io](https://www.javadoc.io/doc/net.uiqui/embedhttp/latest/index.html) site.
 
