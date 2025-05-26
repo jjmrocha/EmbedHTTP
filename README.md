@@ -1,6 +1,8 @@
 # EmbedHTTP
 EmbedHTTP is a lightweight, dependency-free HTTP/1.1 server designed to be easily embedded into existing projects. It provides a simple and efficient way to expose HTTP endpoints, making it ideal for use cases such as Kubernetes probes (e.g., liveness and readiness checks) or exposing metrics for Prometheus.
 
+You can get some insights about the origin of the project from [this](https://docs.google.com/presentation/d/1Azz0ppR3KeAU3aOE51tENJwKmhilMcvCEh70QqamTYk/edit?usp=sharing) presentation.
+
 ## Features
 - **No Dependencies**: Built without external libraries, ensuring minimal footprint and easy integration.
 - **Simple API**: Provides a straightforward interface for defining routes and handling HTTP requests.
