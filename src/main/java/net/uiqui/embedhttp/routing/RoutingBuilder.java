@@ -4,21 +4,18 @@ import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
-
 public abstract class RoutingBuilder implements Router {
-    private final Map<HttpMethod, List<Route>> routingTable = new EnumMap<>(HttpMethod.class);
+    private static final RouteTree EMPTY_ROUTE_TREE = new RouteTree();
+    private final Map<HttpMethod, RouteTree> routingTable = new EnumMap<>(HttpMethod.class);
 
     @Override
     public RoutingBuilder withRoute(HttpMethod method, String pathPattern, HttpRequestHandler handler) {
         var route = new Route(method, pathPattern, handler);
-        routingTable.computeIfAbsent(method, k -> new ArrayList<>())
-                .add(route);
+        routingTable.computeIfAbsent(method, k -> new RouteTree())
+                .addRoute(route);
         return this;
     }
 
@@ -57,7 +54,7 @@ public abstract class RoutingBuilder implements Router {
         return withRoute(HttpMethod.PATCH, pathPattern, handler);
     }
 
-    public List<Route> getRoutesForMethod(HttpMethod method) {
-        return routingTable.getOrDefault(method, emptyList());
+    public RouteTree getRouteTreeForMethod(HttpMethod method) {
+        return routingTable.getOrDefault(method, EMPTY_ROUTE_TREE);
     }
 }

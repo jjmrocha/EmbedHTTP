@@ -25,12 +25,12 @@ class RoutingBuilderTest {
         // then
         assertThat(result).isInstanceOf(RoutingBuilder.class);
         var classUnderTest = (RoutingBuilder) result;
-        assertThat(classUnderTest.getRoutesForMethod(HttpMethod.GET)).containsExactly(new Route(HttpMethod.GET, "/get", handler));
-        assertThat(classUnderTest.getRoutesForMethod(HttpMethod.POST)).containsExactly(new Route(HttpMethod.POST, "/post", handler));
-        assertThat(classUnderTest.getRoutesForMethod(HttpMethod.PUT)).containsExactly(new Route(HttpMethod.PUT, "/put", handler));
-        assertThat(classUnderTest.getRoutesForMethod(HttpMethod.DELETE)).containsExactly(new Route(HttpMethod.DELETE, "/delete", handler));
-        assertThat(classUnderTest.getRoutesForMethod(HttpMethod.HEAD)).containsExactly(new Route(HttpMethod.HEAD, "/head", handler));
-        assertThat(classUnderTest.getRoutesForMethod(HttpMethod.OPTIONS)).containsExactly(new Route(HttpMethod.OPTIONS, "/options", handler));
-        assertThat(classUnderTest.getRoutesForMethod(HttpMethod.PATCH)).containsExactly(new Route(HttpMethod.PATCH, "/patch", handler));
+        assertThat(classUnderTest.getRouteTreeForMethod(HttpMethod.GET).getAllRoutes()).containsExactly(new Route(HttpMethod.GET, "/get", handler));
+        assertThat(classUnderTest.getRouteTreeForMethod(HttpMethod.POST).getAllRoutes()).containsExactly(new Route(HttpMethod.POST, "/post", handler));
+        assertThat(classUnderTest.getRouteTreeForMethod(HttpMethod.PUT).getAllRoutes()).containsExactly(new Route(HttpMethod.PUT, "/put", handler));
+        assertThat(classUnderTest.getRouteTreeForMethod(HttpMethod.DELETE).getAllRoutes()).containsExactly(new Route(HttpMethod.DELETE, "/delete", handler));
+        assertThat(classUnderTest.getRouteTreeForMethod(HttpMethod.HEAD).getAllRoutes()).containsExactly(new Route(HttpMethod.HEAD, "/head", handler));
+        assertThat(classUnderTest.getRouteTreeForMethod(HttpMethod.OPTIONS).getAllRoutes()).containsExactly(new Route(HttpMethod.OPTIONS, "/options", handler));
+        assertThat(classUnderTest.getRouteTreeForMethod(HttpMethod.PATCH).getAllRoutes()).containsExactly(new Route(HttpMethod.PATCH, "/patch", handler));
     }
 }
