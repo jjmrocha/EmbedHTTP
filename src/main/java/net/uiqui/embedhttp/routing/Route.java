@@ -4,18 +4,15 @@ import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.api.HttpRequestHandler;
 
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 public class Route {
     private final HttpMethod method;
     private final String pathPattern;
-    private final Pattern pathRegexPattern;
     private final HttpRequestHandler handler;
 
     public Route(HttpMethod method, String pathPattern, HttpRequestHandler handler) {
         this.method = method;
         this.pathPattern = pathPattern;
-        this.pathRegexPattern = PathPatternCompiler.compile(pathPattern);
         this.handler = handler;
     }
 
@@ -25,10 +22,6 @@ public class Route {
 
     public String getPathPattern() {
         return pathPattern;
-    }
-
-    public Pattern getPathRegexPattern() {
-        return pathRegexPattern;
     }
 
     public HttpRequestHandler getHandler() {
