@@ -3,6 +3,7 @@ package net.uiqui.embedhttp.server.io;
 import net.uiqui.embedhttp.Router;
 import net.uiqui.embedhttp.routing.RouterImpl;
 import net.uiqui.embedhttp.server.ServerInstance;
+import net.uiqui.embedhttp.server.state.Counter;
 import net.uiqui.embedhttp.server.state.ServerState;
 
 import java.io.IOException;
@@ -25,7 +26,9 @@ public class IOServer extends ServerInstance {
     }
 
     @Override
-    public void listenAndServe(Router router) {
+    public void listenAndServe(Router router){
+        var counter = new Counter();
+
         try (var serverSocket = new ServerSocket(port, backlog);
              var executorService = Executors.newVirtualThreadPerTaskExecutor()) {
             instancePort.set(serverSocket.getLocalPort());
@@ -39,23 +42,35 @@ public class IOServer extends ServerInstance {
             logger.log(INFO, () -> serverLogMessage("Started on port %d", serverSocket.getLocalPort()));
 
             while (stateMachine.getCurrentState() == ServerState.RUNNING) {
-                acceptAndProcess(serverSocket, executorService, requestProcessor);
+                acceptAndProcess(serverSocket, executorService, counter, requestProcessor);
             }
         } catch (Exception e) {
             logger.log(ERROR, () -> serverLogMessage("Error starting server"), e);
         } finally {
+            waitForAllVirtualThreadsToFinish(counter);
             stateMachine.setState(ServerState.STOPPED);
         }
     }
 
-    private void acceptAndProcess(ServerSocket serverSocket, ExecutorService executorService, RequestProcessor requestProcessor) throws IOException {
+    private static void waitForAllVirtualThreadsToFinish(Counter counter) {
         try {
+            counter.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void acceptAndProcess(ServerSocket serverSocket, ExecutorService executorService, Counter counter, RequestProcessor requestProcessor) throws IOException {
+        try {
+            counter.addOne();
             var clientSocket = serverSocket.accept();
             executorService.submit(() -> handleRequest(clientSocket, requestProcessor));
         } catch (SocketTimeoutException e) {
             // Ignore timeout exception
         } catch (SocketException e) {
             logger.log(ERROR, () -> serverLogMessage("Error accepting client requests"), e);
+        } finally {
+            counter.downOne();
         }
     }
 
