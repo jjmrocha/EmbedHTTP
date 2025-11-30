@@ -234,4 +234,74 @@ class RequestParserTest {
         assertThat(result.getMethod()).isEqualTo(HttpMethod.POST);
         assertThat(result.getBody()).hasSize(chunkSize);
     }
+
+    @Test
+    void testRejectTooManyHeaders() {
+        // given
+        var builder = new StringBuilder();
+        builder.append("GET /test HTTP/1.1\r\n");
+        for (int i = 0; i < 101; i++) { // 101 headers exceeds limit of 100
+            builder.append("Header-").append(i).append(": value\r\n");
+        }
+        builder.append("\r\n");
+        var inputStream = new ByteArrayInputStream(builder.toString().getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Too many headers");
+        assertThat(result).hasMessageContaining("100");
+    }
+
+    @Test
+    void testAcceptMaxHeaderCount() throws Exception {
+        // given
+        var builder = new StringBuilder();
+        builder.append("GET /test HTTP/1.1\r\n");
+        for (int i = 0; i < 100; i++) { // Exactly 100 headers at the limit
+            builder.append("Header-").append(i).append(": value\r\n");
+        }
+        builder.append("\r\n");
+        var inputStream = new ByteArrayInputStream(builder.toString().getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(result.getHeaders()).hasSize(100);
+    }
+
+    @Test
+    void testRejectHeaderTooLarge() {
+        // given
+        var headerValue = "X".repeat(8193); // 8193 bytes exceeds 8KB limit
+        var rawRequest = "GET /test HTTP/1.1\r\n" +
+                "Large-Header: " + headerValue + "\r\n" +
+                "\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Header too large");
+        assertThat(result).hasMessageContaining("8192");
+    }
+
+    @Test
+    void testAcceptHeaderAtMaxSize() throws Exception {
+        // given
+        var headerValue = "X".repeat(8178); // Total header line is exactly 8192 bytes
+        var rawRequest = "GET /test HTTP/1.1\r\n" +
+                "Large-Header: " + headerValue + "\r\n" +
+                "\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(result.getHeaders()).containsKey("Large-Header");
+    }
 }

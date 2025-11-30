@@ -21,6 +21,8 @@ public class RequestParser {
     private static final String TRANSFER_ENCODING_CHUNKED = "chunked";
     private static final int MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
     private static final int MAX_CHUNK_SIZE = 1024 * 1024; // 1MB
+    private static final int MAX_HEADER_COUNT = 100;
+    private static final int MAX_HEADER_SIZE = 8192; // 8KB
 
     public Request parseRequest(InputStream inputStream) throws IOException {
         var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -70,11 +72,21 @@ public class RequestParser {
     private InsensitiveMap decodeRequestHeaders(BufferedReader reader) throws IOException {
         var headers = new InsensitiveMap();
         String line;
+        int headerCount = 0;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            if (line.length() > MAX_HEADER_SIZE) {
+                throw new ProtocolException("Header too large: maximum " + MAX_HEADER_SIZE + " bytes allowed");
+            }
+
             var colonIndex = line.indexOf(':');
             if (colonIndex == -1) {
                 throw new ProtocolException("Invalid header line: " + line);
+            }
+
+            headerCount++;
+            if (headerCount > MAX_HEADER_COUNT) {
+                throw new ProtocolException("Too many headers: maximum " + MAX_HEADER_COUNT + " allowed");
             }
 
             var headerName = line.substring(0, colonIndex).trim();
