@@ -19,6 +19,8 @@ import static net.uiqui.embedhttp.server.ConnectionHeader.KEEP_ALIVE;
 
 public class RequestParser {
     private static final String TRANSFER_ENCODING_CHUNKED = "chunked";
+    private static final int MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final int MAX_CHUNK_SIZE = 1024 * 1024; // 1MB
 
     public Request parseRequest(InputStream inputStream) throws IOException {
         var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -86,6 +88,10 @@ public class RequestParser {
     private String decodeRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
         if (headers.containsKey(HttpHeader.CONTENT_LENGTH.getValue())) {
             var contentLength = Integer.parseInt(headers.get(HttpHeader.CONTENT_LENGTH.getValue()));
+            if (contentLength > MAX_BODY_SIZE) {
+                throw new ProtocolException("Request body too large: " + contentLength);
+            }
+
             return readFixedSizeBodyChunk(reader, contentLength);
         }
 
@@ -132,7 +138,12 @@ public class RequestParser {
             throw new ProtocolException("Unexpected end of stream while reading chunk size");
         }
 
-        return Integer.parseInt(line.trim(), 16);
+        int chunkSize = Integer.parseInt(line.trim(), 16);
+        if (chunkSize > MAX_CHUNK_SIZE) {
+            throw new ProtocolException("Chunk size too large: " + chunkSize);
+        }
+
+        return chunkSize;
     }
 
     private String readFixedSizeBodyChunk(BufferedReader reader, int chunkSize) throws IOException {

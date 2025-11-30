@@ -154,4 +154,84 @@ class RequestParserTest {
         // then
         assertThat(result).isInstanceOf(ProtocolException.class);
     }
+
+    @Test
+    void testRejectRequestBodyTooLarge() {
+        // given
+        var contentLength = 11 * 1024 * 1024; // 11MB
+        var rawRequest = "POST /upload HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Content-Length: " + contentLength + "\r\n" +
+                "\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Request body too large");
+        assertThat(result).hasMessageContaining(String.valueOf(contentLength));
+    }
+
+    @Test
+    void testAcceptRequestBodyAtMaxSize() throws Exception {
+        // given
+        var contentLength = 10 * 1024 * 1024; // 10MB
+        var body = "X".repeat(contentLength);
+        var rawRequest = "POST /upload HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Content-Length: " + contentLength + "\r\n" +
+                "\r\n" +
+                body;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getMethod()).isEqualTo(HttpMethod.POST);
+        assertThat(result.getBody()).hasSize(contentLength);
+    }
+
+    @Test
+    void testRejectChunkedBodyChunkTooLarge() {
+        // given
+        var chunkSize = 2 * 1024 * 1024; // 2MB
+        var hexChunkSize = Integer.toHexString(chunkSize);
+        var rawRequest = "POST /upload HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Transfer-Encoding: chunked\r\n" +
+                "\r\n" +
+                hexChunkSize + "\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Chunk size too large");
+        assertThat(result).hasMessageContaining(String.valueOf(chunkSize));
+    }
+
+    @Test
+    void testAcceptChunkedBodyChunkAtMaxSize() throws Exception {
+        // given
+        var chunkSize = 1024 * 1024; // 1MB
+        var hexChunkSize = Integer.toHexString(chunkSize);
+        var body = "X".repeat(chunkSize);
+        var rawRequest = "POST /upload HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Transfer-Encoding: chunked\r\n" +
+                "\r\n" +
+                hexChunkSize + "\r\n" +
+                body + "\r\n" +
+                "0\r\n" +
+                "\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getMethod()).isEqualTo(HttpMethod.POST);
+        assertThat(result.getBody()).hasSize(chunkSize);
+    }
 }
