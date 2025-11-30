@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 public class Lazy<T> {
     private Supplier<T> supplier;
     private T value;
-    private boolean isInitialized = false;
+    private volatile boolean isInitialized = false;
 
     private Lazy(Supplier<T> supplier) {
         this.supplier = supplier;
@@ -13,9 +13,13 @@ public class Lazy<T> {
 
     public T get() {
         if (!isInitialized) {
-            value = supplier.get();
-            isInitialized = true;
-            supplier = null;
+            synchronized(this) {
+                if (!isInitialized) {
+                    value = supplier.get();
+                    isInitialized = true;
+                    supplier = null;
+                }
+            }
         }
 
         return value;
