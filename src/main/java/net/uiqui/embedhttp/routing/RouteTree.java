@@ -11,7 +11,7 @@ public class RouteTree {
     private final PathSegment rootSegment = new PathSegment.Root();
 
     public void addRoute(Route route) {
-        var pathSegments = slitPath(route.getPathPattern());
+        var pathSegments = splitPath(route.getPathPattern());
 
         if (pathSegments.length == 0) {
             throw new InvalidRouteException("Invalid path pattern: " + route.getPathPattern());
@@ -69,7 +69,7 @@ public class RouteTree {
     }
 
     public RouteMatch findRoute(String pathPattern) {
-        var pathSegments = slitPath(pathPattern);
+        var pathSegments = splitPath(pathPattern);
         if (pathSegments.length == 0) {
             return null;
         }
@@ -125,7 +125,7 @@ public class RouteTree {
         return null;
     }
 
-    protected String[] slitPath(String pathPattern) {
+    protected String[] splitPath(String pathPattern) {
         if (pathPattern == null || pathPattern.isEmpty()) {
             return new String[0];
         }

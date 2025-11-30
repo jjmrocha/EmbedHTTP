@@ -56,7 +56,7 @@ public class RequestProcessor {
         } catch (IOException e) {
             var response = HttpResponse.unexpectedError()
                     .setHeader(HttpHeader.CONNECTION, ConnectionHeader.CLOSE.getValue())
-                    .setBody(ContentType.TEXT_PLAIN, "Something went on our side");
+                    .setBody(ContentType.TEXT_PLAIN, "Something went wrong on our side");
             return RequestPipeline.error(response);
         }
     }

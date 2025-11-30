@@ -77,7 +77,7 @@ public class IOServer extends ServerInstance {
         } catch (ClientDisconnectedException e) {
             logger.log(DEBUG, () -> serverLogMessage("Client(%s:%d): Disconnected", clientAddress, clientPort));
         } catch (Exception e) {
-            logger.log(ERROR, () -> serverLogMessage("Client(%s:%d): Error processing request"), e);
+            logger.log(ERROR, () -> serverLogMessage("Client(%s:%d): Error processing request", clientAddress, clientPort), e);
         }
     }
 }

@@ -14,11 +14,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RouteTreeTest {
     @ParameterizedTest
     @MethodSource("pathTests")
-    void testSlitPath(String path, List<String> expectedSegments) {
+    void testSplitPath(String path, List<String> expectedSegments) {
         // given
         var classUnderTest = new RouteTree();
         // when
-        var result = classUnderTest.slitPath(path);
+        var result = classUnderTest.splitPath(path);
         // then
         assertThat(result).containsExactly(expectedSegments.toArray(new String[0]));
     }
