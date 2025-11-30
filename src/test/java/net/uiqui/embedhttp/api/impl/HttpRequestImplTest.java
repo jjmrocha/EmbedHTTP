@@ -157,4 +157,84 @@ class HttpRequestImplTest {
         // then
         assertThat(result).isEqualTo(pathParameters);
     }
+
+    @Test
+    void testQueryParameterWithEncodedKey() {
+        // given
+        var request = new Request(HttpMethod.GET, "/test?key%20name=value", null, null, false);
+        var classUnderTest = new HttpRequestImpl(request, null, null);
+        // when
+        var result = classUnderTest.getQueryParameters();
+        // then
+        assertThat(result).containsEntry("key name", "value");
+    }
+
+    @Test
+    void testQueryParameterWithoutValue() {
+        // given
+        var request = new Request(HttpMethod.GET, "/test?flag", null, null, false);
+        var classUnderTest = new HttpRequestImpl(request, null, null);
+        // when
+        var result = classUnderTest.getQueryParameters();
+        // then
+        assertThat(result).containsEntry("flag", "");
+    }
+
+    @Test
+    void testQueryParameterWithMultipleEquals() {
+        // given
+        var request = new Request(HttpMethod.GET, "/test?key=value=with=equals", null, null, false);
+        var classUnderTest = new HttpRequestImpl(request, null, null);
+        // when
+        var result = classUnderTest.getQueryParameters();
+        // then
+        assertThat(result).containsEntry("key", "value=with=equals");
+    }
+
+    @Test
+    void testQueryParameterWithEmptyParts() {
+        // given
+        var request = new Request(HttpMethod.GET, "/test?&key1=value1&&key2=value2&", null, null, false);
+        var classUnderTest = new HttpRequestImpl(request, null, null);
+        // when
+        var result = classUnderTest.getQueryParameters();
+        // then
+        assertThat(result)
+                .containsEntry("key1", "value1")
+                .containsEntry("key2", "value2")
+                .hasSize(2);
+    }
+
+    @Test
+    void testQueryParameterMixedEncodedKeyAndValue() {
+        // given
+        var request = new Request(HttpMethod.GET, "/test?encoded%20key=encoded%20value", null, null, false);
+        var classUnderTest = new HttpRequestImpl(request, null, null);
+        // when
+        var result = classUnderTest.getQueryParameters();
+        // then
+        assertThat(result).containsEntry("encoded key", "encoded value");
+    }
+
+    @Test
+    void testQueryParameterWithEncodedSpecialChars() {
+        // given
+        var request = new Request(HttpMethod.GET, "/test?key=%26%3D%3F", null, null, false);
+        var classUnderTest = new HttpRequestImpl(request, null, null);
+        // when
+        var result = classUnderTest.getQueryParameters();
+        // then
+        assertThat(result).containsEntry("key", "&=?");
+    }
+
+    @Test
+    void testEmptyQueryString() {
+        // given
+        var request = new Request(HttpMethod.GET, "/test?", null, null, false);
+        var classUnderTest = new HttpRequestImpl(request, null, null);
+        // when
+        var result = classUnderTest.getQueryParameters();
+        // then
+        assertThat(result).isEmpty();
+    }
 }

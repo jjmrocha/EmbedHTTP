@@ -67,14 +67,24 @@ public class HttpRequestImpl implements HttpRequest {
 
     protected Map<String, String> extractQueryParameters() {
         var parameters = new HashMap<String, String>();
-        var queryParts = request.getQuery().split("&");
+        var query = request.getQuery();
 
+        if (query.isEmpty()) {
+            return parameters;
+        }
+
+        var queryParts = query.split("&");
         for (var part : queryParts) {
-            var keyValue = part.split("=");
+            if (part.isEmpty()) continue;
 
-            if (keyValue.length == 2) {
-                var key = keyValue[0];
-                var value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+            var splitIndex = part.indexOf('=');
+            if (splitIndex == -1) {
+                // Handle valueless parameters: ?flag
+                var key = URLDecoder.decode(part, StandardCharsets.UTF_8);
+                parameters.put(key, "");
+            } else {
+                var key = URLDecoder.decode(part.substring(0, splitIndex), StandardCharsets.UTF_8);
+                var value = URLDecoder.decode(part.substring(splitIndex + 1), StandardCharsets.UTF_8);
                 parameters.put(key, value);
             }
         }
