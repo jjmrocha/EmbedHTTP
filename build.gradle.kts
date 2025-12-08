@@ -23,9 +23,9 @@ repositories {
 
 val mockitoAgent = configurations.create("mockitoAgent")
 
-var junitVersion = "5.12.1"
-var assertjVersion = "3.27.3"
-var mockitoVersion = "5.17.0"
+var junitVersion = "6.0.1"
+var assertjVersion = "3.27.6"
+var mockitoVersion = "5.20.0"
 
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
