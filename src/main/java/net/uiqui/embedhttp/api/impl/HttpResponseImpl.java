@@ -7,6 +7,7 @@ import net.uiqui.embedhttp.api.HttpStatusCode;
 import net.uiqui.embedhttp.server.InsensitiveMap;
 import net.uiqui.embedhttp.server.ConnectionHeader;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 
@@ -52,8 +53,12 @@ public class HttpResponseImpl implements HttpResponse {
     public HttpResponse setBody(String contentType, String body) {
         Objects.requireNonNull(contentType, "Content-Type cannot be null");
         Objects.requireNonNull(body, "Body cannot be null");
+        
+        // Calculate byte length for Content-Length header (HTTP/1.1 requires bytes, not characters)
+        byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
+        
         setHeader(HttpHeader.CONTENT_TYPE, contentType);
-        setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(body.length()));
+        setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(bodyBytes.length));
         this.body = body;
         return this;
     }

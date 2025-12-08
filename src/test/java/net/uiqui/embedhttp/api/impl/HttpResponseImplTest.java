@@ -88,6 +88,52 @@ class HttpResponseImplTest {
         assertThat(classUnderTest.getBody()).isEqualTo(body);
     }
 
+    @Test
+    void testSetBodyWithUTF8Characters() {
+        // given
+        var classUnderTest = new HttpResponseImpl(HttpStatusCode.OK);
+        var contentType = ContentType.TEXT_PLAIN;
+        
+        // Body: "Hello 世界" = 8 characters, but 13 bytes in UTF-8
+        // "Hello " = 6 bytes
+        // "世" = 3 bytes (U+4E16)
+        // "界" = 3 bytes (U+754C)
+        // Total = 6 + 3 + 3 = 12 bytes
+        var body = "Hello 世界";
+        
+        // when
+        classUnderTest.setBody(contentType, body);
+        
+        // then
+        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_TYPE.getValue(), contentType.getValue());
+        // Content-Length should be 12 bytes, not 8 characters
+        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_LENGTH.getValue(), "12");
+        assertThat(classUnderTest.getBody()).isEqualTo(body);
+    }
+
+    @Test
+    void testSetBodyWithVariousUTF8Characters() {
+        // given
+        var classUnderTest = new HttpResponseImpl(HttpStatusCode.OK);
+        var contentType = "application/json";
+        
+        // Test with emojis and special characters
+        // "café 🎉" = 7 characters
+        // "café " = "caf" (3) + "é" (2 bytes: C3 A9) + " " (1) = 6 bytes
+        // "🎉" = 4 bytes (F0 9F 8E 89)
+        // Total = 6 + 4 = 10 bytes
+        var body = "café 🎉";
+        
+        // when
+        classUnderTest.setBody(contentType, body);
+        
+        // then
+        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_TYPE.getValue(), contentType);
+        // Content-Length should be 10 bytes, not 7 characters
+        assertThat(classUnderTest.getHeaders()).containsEntry(HttpHeader.CONTENT_LENGTH.getValue(), "10");
+        assertThat(classUnderTest.getBody()).isEqualTo(body);
+    }
+
     private static Stream<Arguments> statusCodes() {
         return Arrays.stream(HttpStatusCode.values())
                 .map(statusCode -> Arguments.of(statusCode, statusCode.getCode(), statusCode.getReasonPhrase()));
