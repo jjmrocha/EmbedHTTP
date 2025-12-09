@@ -60,27 +60,30 @@ public class IOServer extends ServerInstance {
         }
     }
 
-    private void acceptAndProcess(ServerSocket serverSocket, ExecutorService executorService, Counter counter, RequestProcessor requestProcessor) throws IOException {
+    private void acceptAndProcess(
+            ServerSocket serverSocket,
+            ExecutorService executorService,
+            Counter counter,
+            RequestProcessor requestProcessor
+    ) throws IOException {
         try {
-            counter.addOne();
             var clientSocket = serverSocket.accept();
-            executorService.submit(() -> handleRequest(clientSocket, requestProcessor));
+            executorService.submit(() -> handleRequest(clientSocket, counter, requestProcessor));
         } catch (SocketTimeoutException e) {
             // Ignore timeout exception
         } catch (SocketException e) {
             logger.log(ERROR, () -> serverLogMessage("Error accepting client requests"), e);
-        } finally {
-            counter.downOne();
         }
     }
 
-    private void handleRequest(Socket clientSocket, RequestProcessor requestProcessor) {
+    private void handleRequest(Socket clientSocket, Counter counter, RequestProcessor requestProcessor) {
         var clientAddress = clientSocket.getInetAddress().getHostAddress();
         var clientPort = clientSocket.getPort();
 
         logger.log(DEBUG, () -> serverLogMessage("Client(%s:%d): Connected", clientAddress, clientPort));
 
         try (clientSocket) {
+            counter.addOne();
             clientSocket.setSoTimeout(SO_TIMEOUT);
             var keepAlive = true;
 
@@ -93,6 +96,8 @@ public class IOServer extends ServerInstance {
             logger.log(DEBUG, () -> serverLogMessage("Client(%s:%d): Disconnected", clientAddress, clientPort));
         } catch (Exception e) {
             logger.log(ERROR, () -> serverLogMessage("Client(%s:%d): Error processing request", clientAddress, clientPort), e);
+        } finally {
+            counter.downOne();
         }
     }
 }
