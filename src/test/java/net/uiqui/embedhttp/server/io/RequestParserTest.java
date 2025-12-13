@@ -304,4 +304,147 @@ class RequestParserTest {
         assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(result.getHeaders()).containsKey("Large-Header");
     }
+
+    @Test
+    void testAcceptHttp10Version() throws Exception {
+        // given
+        var rawRequest = """
+                GET /test HTTP/1.0\r
+                Host: localhost\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(result.getUrl()).isEqualTo("/test");
+    }
+
+    @Test
+    void testAcceptHttp11Version() throws Exception {
+        // given
+        var rawRequest = """
+                GET /test HTTP/1.1\r
+                Host: localhost\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(result.getUrl()).isEqualTo("/test");
+    }
+
+    @Test
+    void testRejectHttp20Version() {
+        // given
+        var rawRequest = """
+                GET /test HTTP/2.0\r
+                Host: localhost\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Unsupported HTTP version");
+        assertThat(result).hasMessageContaining("HTTP/2.0");
+    }
+
+    @Test
+    void testRejectHttp30Version() {
+        // given
+        var rawRequest = """
+                GET /test HTTP/3.0\r
+                Host: localhost\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Unsupported HTTP version");
+        assertThat(result).hasMessageContaining("HTTP/3.0");
+    }
+
+    @Test
+    void testRejectInvalidVersionFormat() {
+        // given
+        var rawRequest = """
+                GET /test GARBAGE\r
+                Host: localhost\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Unsupported HTTP version");
+        assertThat(result).hasMessageContaining("GARBAGE");
+    }
+
+    @Test
+    void testRejectEmptyVersion() {
+        // given
+        var rawRequest = """
+                GET /test \r
+                Host: localhost\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+    }
+
+    @Test
+    void testRejectHttpVersionWithExtraSpaces() {
+        // given
+        var rawRequest = """
+                GET /test HTTP /1.1\r
+                Host: localhost\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Unsupported HTTP version");
+    }
+
+    @Test
+    void testRejectLowercaseHttpVersion() {
+        // given
+        var rawRequest = """
+                GET /test http/1.1\r
+                Host: localhost\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() ->
+                classUnderTest.parseRequest(inputStream)
+        );
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Unsupported HTTP version");
+        assertThat(result).hasMessageContaining("http/1.1");
+    }
 }

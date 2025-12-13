@@ -80,15 +80,19 @@ public class HttpRequestImpl implements HttpRequest {
             var splitIndex = part.indexOf('=');
             if (splitIndex == -1) {
                 // Handle valueless parameters: ?flag
-                var key = URLDecoder.decode(part, StandardCharsets.UTF_8);
+                var key = decodeParam(part);
                 parameters.put(key, "");
             } else {
-                var key = URLDecoder.decode(part.substring(0, splitIndex), StandardCharsets.UTF_8);
-                var value = URLDecoder.decode(part.substring(splitIndex + 1), StandardCharsets.UTF_8);
+                var key = decodeParam(part.substring(0, splitIndex));
+                var value = decodeParam(part.substring(splitIndex + 1));
                 parameters.put(key, value);
             }
         }
 
         return parameters;
+    }
+
+    private static String decodeParam(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }
