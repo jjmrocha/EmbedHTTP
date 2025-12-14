@@ -48,15 +48,13 @@ public class RequestParser {
         }
 
         var url = parts[1];
-        var version = parts[2];
-        validateHttpVersion(version);
-        return new RequestLine(method, url, version);
-    }
 
-    private void validateHttpVersion(String version) throws ProtocolException {
-        if (!HTTPVersion.isSupported(version)) {
-            throw new ProtocolException("Unsupported HTTP version: " + version);
+        var version = HttpVersion.fromString(parts[2]);
+        if (version == null) {
+            throw new ProtocolException("Unsupported HTTP version: " + parts[2]);
         }
+
+        return new RequestLine(method, url, version);
     }
 
     private static String readRequestLine(BufferedReader reader) throws IOException {
@@ -188,6 +186,6 @@ public class RequestParser {
         }
     }
 
-    protected record RequestLine(HttpMethod method, String url, String version) {
+    protected record RequestLine(HttpMethod method, String url, HttpVersion version) {
     }
 }
