@@ -32,6 +32,16 @@ public class ResponseWriter {
                     .append(CRLF);
         }
 
+        // Ensure a definite message framing on keep-alive connections: a response with no body
+        // still needs Content-Length (except where the status forbids a body).
+        if (response.getBody() == null
+                && statusAllowsBody(response.getStatusCode())
+                && !response.getHeaders().containsKey(HttpHeader.CONTENT_LENGTH.getValue())) {
+            builder.append(HttpHeader.CONTENT_LENGTH.getValue())
+                    .append(": 0")
+                    .append(CRLF);
+        }
+
         // Write the Date header
         builder.append(HttpHeader.DATE.getValue())
                 .append(": ")
@@ -49,5 +59,14 @@ public class ResponseWriter {
         // Write and flush the output stream to ensure all data is sent
         outputStream.write(builder.toString().getBytes());
         outputStream.flush();
+    }
+
+    private boolean statusAllowsBody(int statusCode) {
+        // 1xx informational, 204 No Content and 304 Not Modified must not carry a message body.
+        if (statusCode >= 100 && statusCode < 200) {
+            return false;
+        }
+
+        return statusCode != 204 && statusCode != 304;
     }
 }

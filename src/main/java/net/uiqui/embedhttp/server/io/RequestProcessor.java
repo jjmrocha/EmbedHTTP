@@ -11,10 +11,8 @@ import net.uiqui.embedhttp.server.Request;
 import net.uiqui.embedhttp.server.RequestPipeline;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ProtocolException;
-import java.net.Socket;
 
 public class RequestProcessor {
     private final RequestParser requestParser;
@@ -27,12 +25,12 @@ public class RequestProcessor {
         this.router = router;
     }
 
-    public boolean process(Socket clientSocket) throws IOException {
-        var response = RequestPipeline.value(clientSocket.getInputStream())
+    public boolean process(HttpConnectionReader reader, OutputStream outputStream) throws IOException {
+        var response = RequestPipeline.value(reader)
                 .map(this::parse)
                 .map(this::route)
                 .then(this::execute);
-        write(response, clientSocket.getOutputStream());
+        write(response, outputStream);
 
         return shouldKeepAliveConnection(response);
     }
@@ -42,9 +40,9 @@ public class RequestProcessor {
         return !castedResponse.closeConnection();
     }
 
-    private RequestPipeline<Request> parse(InputStream inputStream) throws ClientDisconnectedException {
+    private RequestPipeline<Request> parse(HttpConnectionReader reader) throws ClientDisconnectedException {
         try {
-            var request = requestParser.parseRequest(inputStream);
+            var request = requestParser.parseRequest(reader);
             return RequestPipeline.value(request);
         } catch (ProtocolException e) {
             var response = HttpResponse.badRequest()

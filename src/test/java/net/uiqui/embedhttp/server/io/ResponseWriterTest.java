@@ -69,6 +69,24 @@ class ResponseWriterTest {
         assertThat(result).isEqualTo(expected);
     }
 
+    @Test
+    void testWriteBodylessOkResponseHasContentLengthZero() throws IOException {
+        // given
+        var response = buildResponse(HttpStatusCode.OK, null);
+        var outputStream = new ByteArrayOutputStream();
+        // when
+        classUnderTest.writeResponse(outputStream, response);
+        // then
+        var expected = """
+                HTTP/1.1 200 OK\r
+                Content-Length: 0\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
+                \r
+                """;
+        var result = outputStream.toString();
+        assertThat(result).isEqualTo(expected);
+    }
+
     private HttpResponseImpl buildResponse(HttpStatusCode status, String body) {
         var response = new HttpResponseImpl(status);
 

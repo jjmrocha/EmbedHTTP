@@ -84,6 +84,47 @@ class RequestParserTest {
     }
 
     @Test
+    void testParseBodyByByteCountNotCharCount() throws Exception {
+        // given — "héllo" is 5 characters but 6 bytes in UTF-8; Content-Length counts octets
+        var body = "héllo";
+        var contentLength = body.getBytes(StandardCharsets.UTF_8).length; // 6
+        var rawRequest = "POST /submit HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Content-Length: " + contentLength + "\r\n" +
+                "\r\n" +
+                body;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getBody()).isEqualTo("héllo");
+    }
+
+    @Test
+    void testParseTwoRequestsOnSameReaderWithoutOverReading() throws Exception {
+        // given — two back-to-back requests on one connection; the first has a body
+        var rawRequests = "POST /first HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Content-Length: 5\r\n" +
+                "\r\n" +
+                "HELLO" +
+                "GET /second HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "\r\n";
+        var reader = new HttpConnectionReader(
+                new ByteArrayInputStream(rawRequests.getBytes(StandardCharsets.UTF_8))
+        );
+        // when
+        var first = classUnderTest.parseRequest(reader);
+        var second = classUnderTest.parseRequest(reader);
+        // then
+        assertThat(first.getUrl()).isEqualTo("/first");
+        assertThat(first.getBody()).isEqualTo("HELLO");
+        assertThat(second.getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(second.getUrl()).isEqualTo("/second");
+    }
+
+    @Test
     void testKeepAliveHeader() throws Exception {
         // given
         var rawRequest = """

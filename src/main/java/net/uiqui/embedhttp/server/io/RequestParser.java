@@ -5,10 +5,9 @@ import net.uiqui.embedhttp.api.HttpMethod;
 import net.uiqui.embedhttp.server.InsensitiveMap;
 import net.uiqui.embedhttp.server.Request;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
@@ -25,7 +24,10 @@ public class RequestParser {
     private static final int MAX_HEADER_SIZE = 8192; // 8KB
 
     public Request parseRequest(InputStream inputStream) throws IOException {
-        var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        return parseRequest(new HttpConnectionReader(inputStream));
+    }
+
+    public Request parseRequest(HttpConnectionReader reader) throws IOException {
         var requestLine = decodeRequestLine(reader);
         var headers = decodeRequestHeaders(reader);
         var body = decodeRequestBody(reader, headers);
@@ -34,7 +36,7 @@ public class RequestParser {
         return new Request(requestLine.method(), requestLine.url(), headers, body, keepAlive);
     }
 
-    private RequestLine decodeRequestLine(BufferedReader reader) throws IOException {
+    private RequestLine decodeRequestLine(HttpConnectionReader reader) throws IOException {
         var line = readRequestLine(reader);
 
         var parts = line.split(" ", 3);
@@ -57,7 +59,7 @@ public class RequestParser {
         return new RequestLine(method, url, version);
     }
 
-    private static String readRequestLine(BufferedReader reader) throws IOException {
+    private static String readRequestLine(HttpConnectionReader reader) throws IOException {
         try {
             var line = reader.readLine();
             if (line == null) {
@@ -74,7 +76,7 @@ public class RequestParser {
         }
     }
 
-    private InsensitiveMap decodeRequestHeaders(BufferedReader reader) throws IOException {
+    private InsensitiveMap decodeRequestHeaders(HttpConnectionReader reader) throws IOException {
         var headers = new InsensitiveMap();
         String line;
         int headerCount = 0;
@@ -102,14 +104,14 @@ public class RequestParser {
         return headers;
     }
 
-    private String decodeRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+    private String decodeRequestBody(HttpConnectionReader reader, Map<String, String> headers) throws IOException {
         if (headers.containsKey(HttpHeader.CONTENT_LENGTH.getValue())) {
             var contentLength = Integer.parseInt(headers.get(HttpHeader.CONTENT_LENGTH.getValue()));
             if (contentLength > MAX_BODY_SIZE) {
                 throw new ProtocolException("Request body too large: " + contentLength);
             }
 
-            return readFixedSizeBodyChunk(reader, contentLength);
+            return new String(reader.readBody(contentLength), StandardCharsets.UTF_8);
         }
 
         if (TRANSFER_ENCODING_CHUNKED.equalsIgnoreCase(headers.get(HttpHeader.TRANSFER_ENCODING.getValue()))) {
@@ -132,8 +134,8 @@ public class RequestParser {
         return !CLOSE.getValue().equalsIgnoreCase(connectionHeader);
     }
 
-    private String readChunkedBody(BufferedReader reader) throws IOException {
-        var body = new StringBuilder();
+    private String readChunkedBody(HttpConnectionReader reader) throws IOException {
+        var body = new ByteArrayOutputStream();
 
         while (true) {
             int chunkSize = readChunkSize(reader);
@@ -142,14 +144,14 @@ public class RequestParser {
                 break;
             }
 
-            body.append(readFixedSizeBodyChunk(reader, chunkSize));
+            body.writeBytes(reader.readBody(chunkSize));
             consumeTrailingLine(reader); // Consume trailing \r\n
         }
 
-        return body.toString();
+        return body.toString(StandardCharsets.UTF_8);
     }
 
-    private int readChunkSize(BufferedReader reader) throws IOException {
+    private int readChunkSize(HttpConnectionReader reader) throws IOException {
         var line = reader.readLine();
         if (line == null) {
             throw new ProtocolException("Unexpected end of stream while reading chunk size");
@@ -163,23 +165,7 @@ public class RequestParser {
         return chunkSize;
     }
 
-    private String readFixedSizeBodyChunk(BufferedReader reader, int chunkSize) throws IOException {
-        var chunk = new char[chunkSize];
-        int read = 0;
-
-        while (read < chunkSize) {
-            var readCount = reader.read(chunk, read, chunkSize - read);
-            if (readCount == -1) {
-                throw new ProtocolException("Unexpected end of stream while reading body");
-            }
-
-            read += readCount;
-        }
-
-        return new String(chunk);
-    }
-
-    private void consumeTrailingLine(BufferedReader reader) throws IOException {
+    private void consumeTrailingLine(HttpConnectionReader reader) throws IOException {
         var line = reader.readLine();
         if (line == null) {
             throw new ProtocolException("Unexpected end of stream while consuming trailing line");
