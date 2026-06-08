@@ -72,16 +72,21 @@ public class RequestProcessor {
     }
 
     private HttpResponse execute(HttpRequestImpl httpRequest) {
+        var response = invokeHandler(httpRequest);
+
+        // Honour the request's close intent regardless of whether the handler succeeded or threw.
+        if (!httpRequest.getRequest().isKeepAlive()) {
+            response.setHeader(HttpHeader.CONNECTION, ConnectionHeader.CLOSE.getValue());
+        }
+
+        return response;
+    }
+
+    private HttpResponse invokeHandler(HttpRequestImpl httpRequest) {
         var handler = httpRequest.getRoute().getHandler();
 
         try {
-            var response = handler.handle(httpRequest);
-
-            if (!httpRequest.getRequest().isKeepAlive()) {
-                response.setHeader(HttpHeader.CONNECTION, ConnectionHeader.CLOSE.getValue());
-            }
-
-            return response;
+            return handler.handle(httpRequest);
         } catch (Exception e) {
             return HttpResponse.unexpectedError()
                     .setBody(ContentType.TEXT_PLAIN, "Unexpected error executing request");

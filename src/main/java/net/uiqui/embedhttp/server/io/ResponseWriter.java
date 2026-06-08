@@ -6,6 +6,7 @@ import net.uiqui.embedhttp.server.DateHeader;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class ResponseWriter {
     public static final String HTTP_VERSION_1_1 = "HTTP/1.1";
@@ -42,11 +43,13 @@ public class ResponseWriter {
                     .append(CRLF);
         }
 
-        // Write the Date header
-        builder.append(HttpHeader.DATE.getValue())
-                .append(": ")
-                .append(dateHeader.getDateHeaderValue())
-                .append(CRLF);
+        // Write the Date header, unless the handler already supplied one (avoid duplicate Date).
+        if (!response.getHeaders().containsKey(HttpHeader.DATE.getValue())) {
+            builder.append(HttpHeader.DATE.getValue())
+                    .append(": ")
+                    .append(dateHeader.getDateHeaderValue())
+                    .append(CRLF);
+        }
 
         // End of headers
         builder.append(CRLF);
@@ -57,7 +60,7 @@ public class ResponseWriter {
         }
 
         // Write and flush the output stream to ensure all data is sent
-        outputStream.write(builder.toString().getBytes());
+        outputStream.write(builder.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 

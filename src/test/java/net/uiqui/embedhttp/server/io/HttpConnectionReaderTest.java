@@ -29,12 +29,23 @@ class HttpConnectionReaderTest {
     }
 
     @Test
-    void testReadLineAcceptsBareLf() throws Exception {
-        // given
+    void testReadLineRejectsBareLf() {
+        // given — HTTP framing requires CRLF; a bare LF is rejected (smuggling defense)
         var reader = readerFor("line-one\nline-two\n");
-        // when / then
-        assertThat(reader.readLine()).isEqualTo("line-one");
-        assertThat(reader.readLine()).isEqualTo("line-two");
+        // when
+        var thrown = catchThrowable(reader::readLine);
+        // then
+        assertThat(thrown).isInstanceOf(ProtocolException.class);
+    }
+
+    @Test
+    void testReadLineRejectsOverlongLine() {
+        // given — a line with no terminator must not grow memory without bound
+        var reader = readerFor("A".repeat(9000) + "\r\n");
+        // when
+        var thrown = catchThrowable(reader::readLine);
+        // then
+        assertThat(thrown).isInstanceOf(ProtocolException.class);
     }
 
     @Test

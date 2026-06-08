@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 public class HttpConnectionReader {
     private static final int CR = '\r';
     private static final int LF = '\n';
+    private static final int MAX_LINE_LENGTH = 8192; // 8KB — request line and header lines
 
     private final InputStream inputStream;
 
@@ -45,6 +46,11 @@ public class HttpConnectionReader {
             }
 
             buffer.write(read);
+
+            // Bound per-line memory; allow one extra byte for the trailing CR of a max-length line.
+            if (buffer.size() > MAX_LINE_LENGTH + 1) {
+                throw new ProtocolException("Line exceeds maximum length of " + MAX_LINE_LENGTH + " bytes");
+            }
         }
 
         if (buffer.size() == 0) {
@@ -77,14 +83,15 @@ public class HttpConnectionReader {
         return bytes;
     }
 
-    private static String toLine(ByteArrayOutputStream buffer) {
+    private static String toLine(ByteArrayOutputStream buffer) throws ProtocolException {
         var bytes = buffer.toByteArray();
         var length = bytes.length;
 
-        if (length > 0 && bytes[length - 1] == CR) {
-            length--;
+        // HTTP framing requires CRLF: the LF just consumed must be preceded by CR.
+        if (length == 0 || bytes[length - 1] != CR) {
+            throw new ProtocolException("Invalid line terminator: expected CRLF");
         }
 
-        return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
+        return new String(bytes, 0, length - 1, StandardCharsets.ISO_8859_1);
     }
 }

@@ -327,7 +327,7 @@ class RequestParserTest {
         );
         // then
         assertThat(result).isInstanceOf(ProtocolException.class);
-        assertThat(result).hasMessageContaining("Header too large");
+        assertThat(result).hasMessageContaining("maximum length");
         assertThat(result).hasMessageContaining("8192");
     }
 

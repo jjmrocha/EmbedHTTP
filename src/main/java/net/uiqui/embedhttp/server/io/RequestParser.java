@@ -21,7 +21,6 @@ public class RequestParser {
     private static final int MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
     private static final int MAX_CHUNK_SIZE = 1024 * 1024; // 1MB
     private static final int MAX_HEADER_COUNT = 100;
-    private static final int MAX_HEADER_SIZE = 8192; // 8KB
 
     public Request parseRequest(InputStream inputStream) throws IOException {
         return parseRequest(new HttpConnectionReader(inputStream));
@@ -90,10 +89,6 @@ public class RequestParser {
         int headerCount = 0;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            if (line.length() > MAX_HEADER_SIZE) {
-                throw new ProtocolException("Header too large: maximum " + MAX_HEADER_SIZE + " bytes allowed");
-            }
-
             var colonIndex = line.indexOf(':');
             if (colonIndex == -1) {
                 throw new ProtocolException("Invalid header line: " + line);
