@@ -31,3 +31,4 @@ replay_pid*
 build/
 .DS_Store
 examples/readme/readme.iml
+/.serena

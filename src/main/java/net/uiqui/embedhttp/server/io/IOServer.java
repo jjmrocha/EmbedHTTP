@@ -85,10 +85,12 @@ public class IOServer extends ServerInstance {
         try (clientSocket) {
             counter.addOne();
             clientSocket.setSoTimeout(SO_TIMEOUT);
+            var reader = new HttpConnectionReader(clientSocket.getInputStream());
+            var outputStream = clientSocket.getOutputStream();
             var keepAlive = true;
 
             while (keepAlive && stateMachine.getCurrentState() == ServerState.RUNNING) {
-                keepAlive = requestProcessor.process(clientSocket);
+                keepAlive = requestProcessor.process(reader, outputStream);
             }
 
             logger.log(DEBUG, () -> serverLogMessage("Client(%s:%d): Connection closed", clientAddress, clientPort));

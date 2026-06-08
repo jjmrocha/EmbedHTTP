@@ -1,6 +1,7 @@
 package net.uiqui.embedhttp.server.io;
 
 import net.uiqui.embedhttp.api.ContentType;
+import net.uiqui.embedhttp.api.HttpHeader;
 import net.uiqui.embedhttp.api.HttpStatusCode;
 import net.uiqui.embedhttp.api.impl.HttpResponseImpl;
 import net.uiqui.embedhttp.server.Now;
@@ -66,6 +67,64 @@ class ResponseWriterTest {
                 \r
                 Hello World""";
         var result = outputStream.toString();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void testWriteBodylessOkResponseHasContentLengthZero() throws IOException {
+        // given
+        var response = buildResponse(HttpStatusCode.OK, null);
+        var outputStream = new ByteArrayOutputStream();
+        // when
+        classUnderTest.writeResponse(outputStream, response);
+        // then
+        var expected = """
+                HTTP/1.1 200 OK\r
+                Content-Length: 0\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
+                \r
+                """;
+        var result = outputStream.toString();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void testDoesNotDuplicateDateHeaderWhenAlreadySet() throws IOException {
+        // given — a handler set its own Date; the writer must not append a second one
+        var response = new HttpResponseImpl(HttpStatusCode.OK);
+        response.setHeader(HttpHeader.DATE, "Mon, 02 Oct 2023 10:00:00 GMT");
+        response.setBody(ContentType.TEXT_PLAIN, "Hello World");
+        var outputStream = new ByteArrayOutputStream();
+        // when
+        classUnderTest.writeResponse(outputStream, response);
+        // then
+        var expected = """
+                HTTP/1.1 200 OK\r
+                Content-Length: 11\r
+                Content-Type: text/plain\r
+                Date: Mon, 02 Oct 2023 10:00:00 GMT\r
+                \r
+                Hello World""";
+        var result = outputStream.toString();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void testWritesBodyAsUtf8Bytes() throws IOException {
+        // given — a multi-byte body must be written as UTF-8 matching the Content-Length byte count
+        var response = buildResponse(HttpStatusCode.OK, "héllo");
+        var outputStream = new ByteArrayOutputStream();
+        // when
+        classUnderTest.writeResponse(outputStream, response);
+        // then
+        var result = new String(outputStream.toByteArray(), java.nio.charset.StandardCharsets.UTF_8);
+        var expected = """
+                HTTP/1.1 200 OK\r
+                Content-Length: 6\r
+                Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
+                \r
+                héllo""";
         assertThat(result).isEqualTo(expected);
     }
 

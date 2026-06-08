@@ -6,6 +6,7 @@ import net.uiqui.embedhttp.server.DateHeader;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class ResponseWriter {
     public static final String HTTP_VERSION_1_1 = "HTTP/1.1";
@@ -32,11 +33,23 @@ public class ResponseWriter {
                     .append(CRLF);
         }
 
-        // Write the Date header
-        builder.append(HttpHeader.DATE.getValue())
-                .append(": ")
-                .append(dateHeader.getDateHeaderValue())
-                .append(CRLF);
+        // Ensure a definite message framing on keep-alive connections: a response with no body
+        // still needs Content-Length (except where the status forbids a body).
+        if (response.getBody() == null
+                && statusAllowsBody(response.getStatusCode())
+                && !response.getHeaders().containsKey(HttpHeader.CONTENT_LENGTH.getValue())) {
+            builder.append(HttpHeader.CONTENT_LENGTH.getValue())
+                    .append(": 0")
+                    .append(CRLF);
+        }
+
+        // Write the Date header, unless the handler already supplied one (avoid duplicate Date).
+        if (!response.getHeaders().containsKey(HttpHeader.DATE.getValue())) {
+            builder.append(HttpHeader.DATE.getValue())
+                    .append(": ")
+                    .append(dateHeader.getDateHeaderValue())
+                    .append(CRLF);
+        }
 
         // End of headers
         builder.append(CRLF);
@@ -47,7 +60,16 @@ public class ResponseWriter {
         }
 
         // Write and flush the output stream to ensure all data is sent
-        outputStream.write(builder.toString().getBytes());
+        outputStream.write(builder.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
+    }
+
+    private boolean statusAllowsBody(int statusCode) {
+        // 1xx informational, 204 No Content and 304 Not Modified must not carry a message body.
+        if (statusCode >= 100 && statusCode < 200) {
+            return false;
+        }
+
+        return statusCode != 204 && statusCode != 304;
     }
 }

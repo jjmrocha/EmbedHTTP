@@ -14,13 +14,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 
 class RequestProcessorTest {
@@ -65,9 +62,9 @@ class RequestProcessorTest {
                         """
         );
         var outputStream = new ByteArrayOutputStream();
-        var clientSocket = buildClientSocket(inputStream, outputStream);
+        var reader = new HttpConnectionReader(inputStream);
         // when
-        classUnderTest.process(clientSocket);
+        classUnderTest.process(reader, outputStream);
         // then
         var expected = """
                 HTTP/1.1 200 OK\r
@@ -89,9 +86,9 @@ class RequestProcessorTest {
                         """
         );
         var outputStream = new ByteArrayOutputStream();
-        var clientSocket = buildClientSocket(inputStream, outputStream);
+        var reader = new HttpConnectionReader(inputStream);
         // when
-        classUnderTest.process(clientSocket);
+        classUnderTest.process(reader, outputStream);
         // then
         var expected = """
                 HTTP/1.1 400 Bad Request\r
@@ -117,9 +114,9 @@ class RequestProcessorTest {
                         """
         );
         var outputStream = new ByteArrayOutputStream();
-        var clientSocket = buildClientSocket(inputStream, outputStream);
+        var reader = new HttpConnectionReader(inputStream);
         // when
-        classUnderTest.process(clientSocket);
+        classUnderTest.process(reader, outputStream);
         // then
         var expected = """
                 HTTP/1.1 404 Not Found\r
@@ -144,9 +141,9 @@ class RequestProcessorTest {
                         """
         );
         var outputStream = new ByteArrayOutputStream();
-        var clientSocket = buildClientSocket(inputStream, outputStream);
+        var reader = new HttpConnectionReader(inputStream);
         // when
-        classUnderTest.process(clientSocket);
+        classUnderTest.process(reader, outputStream);
         // then
         var expected = """
                 HTTP/1.1 500 Internal Server Error\r
@@ -172,9 +169,9 @@ class RequestProcessorTest {
                         """
         );
         var outputStream = new ByteArrayOutputStream();
-        var clientSocket = buildClientSocket(inputStream, outputStream);
+        var reader = new HttpConnectionReader(inputStream);
         // when
-        classUnderTest.process(clientSocket);
+        classUnderTest.process(reader, outputStream);
         // then
         var expected = """
                 HTTP/1.1 200 OK\r
@@ -201,9 +198,9 @@ class RequestProcessorTest {
                         """
         );
         var outputStream = new ByteArrayOutputStream();
-        var clientSocket = buildClientSocket(inputStream, outputStream);
+        var reader = new HttpConnectionReader(inputStream);
         // when
-        classUnderTest.process(clientSocket);
+        classUnderTest.process(reader, outputStream);
         // then
         var expected = """
                 HTTP/1.1 200 OK\r
@@ -216,11 +213,60 @@ class RequestProcessorTest {
         assertThat(result).isEqualTo(expected);
     }
 
-    private static Socket buildClientSocket(InputStream inputStream, ByteArrayOutputStream outputStream) throws IOException {
-        var clientSocket = mock(Socket.class);
-        given(clientSocket.getInputStream()).willReturn(inputStream);
-        given(clientSocket.getOutputStream()).willReturn(outputStream);
-        return clientSocket;
+    @Test
+    void testProcessErrorPropagatesConnectionClose() throws IOException {
+        // given — a handler that throws, on a Connection: close request; the 500 must also close
+        var inputStream = buildInputStream(
+                """
+                        PUT /error HTTP/1.1\r
+                        Host: localhost\r
+                        Connection: close\r
+                        \r
+                        """
+        );
+        var outputStream = new ByteArrayOutputStream();
+        var reader = new HttpConnectionReader(inputStream);
+        // when
+        classUnderTest.process(reader, outputStream);
+        // then
+        var expected = """
+                HTTP/1.1 500 Internal Server Error\r
+                Connection: close\r
+                Content-Length: 34\r
+                Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
+                \r
+                Unexpected error executing request""";
+        var result = outputStream.toString();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void testProcessRejectsMalformedContentLengthWith400() throws IOException {
+        // given — a non-numeric Content-Length must yield a 400 response, not a dropped connection
+        var inputStream = buildInputStream(
+                """
+                        POST /test HTTP/1.1\r
+                        Host: localhost\r
+                        Content-Length: abc\r
+                        \r
+                        """
+        );
+        var outputStream = new ByteArrayOutputStream();
+        var reader = new HttpConnectionReader(inputStream);
+        // when
+        classUnderTest.process(reader, outputStream);
+        // then
+        var expected = """
+                HTTP/1.1 400 Bad Request\r
+                Connection: close\r
+                Content-Length: 40\r
+                Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
+                \r
+                Bad Request: Invalid Content-Length: abc""";
+        var result = outputStream.toString();
+        assertThat(result).isEqualTo(expected);
     }
 
     private static InputStream buildInputStream(String rawRequest) {
