@@ -213,6 +213,34 @@ class RequestProcessorTest {
         assertThat(result).isEqualTo(expected);
     }
 
+    @Test
+    void testProcessRejectsMalformedContentLengthWith400() throws IOException {
+        // given — a non-numeric Content-Length must yield a 400 response, not a dropped connection
+        var inputStream = buildInputStream(
+                """
+                        POST /test HTTP/1.1\r
+                        Host: localhost\r
+                        Content-Length: abc\r
+                        \r
+                        """
+        );
+        var outputStream = new ByteArrayOutputStream();
+        var reader = new HttpConnectionReader(inputStream);
+        // when
+        classUnderTest.process(reader, outputStream);
+        // then
+        var expected = """
+                HTTP/1.1 400 Bad Request\r
+                Connection: close\r
+                Content-Length: 40\r
+                Content-Type: text/plain\r
+                Date: Sun, 01 Oct 2023 12:00:00 GMT\r
+                \r
+                Bad Request: Invalid Content-Length: abc""";
+        var result = outputStream.toString();
+        assertThat(result).isEqualTo(expected);
+    }
+
     private static InputStream buildInputStream(String rawRequest) {
         return new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
     }

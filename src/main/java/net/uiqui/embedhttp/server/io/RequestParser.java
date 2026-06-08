@@ -30,10 +30,18 @@ public class RequestParser {
     public Request parseRequest(HttpConnectionReader reader) throws IOException {
         var requestLine = decodeRequestLine(reader);
         var headers = decodeRequestHeaders(reader);
+        validateHost(requestLine.version(), headers);
         var body = decodeRequestBody(reader, headers);
-        var keepAlive = decodeKeepAlive(headers);
+        var keepAlive = decodeKeepAlive(requestLine.version(), headers);
 
         return new Request(requestLine.method(), requestLine.url(), headers, body, keepAlive);
+    }
+
+    private void validateHost(HttpVersion version, InsensitiveMap headers) throws ProtocolException {
+        // RFC 9112 §3.2: an HTTP/1.1 request MUST carry a Host header (duplicates are rejected during header parsing).
+        if (version == HttpVersion.VERSION_1_1 && !headers.containsKey(HttpHeader.HOST.getValue())) {
+            throw new ProtocolException("Missing Host header");
+        }
     }
 
     private RequestLine decodeRequestLine(HttpConnectionReader reader) throws IOException {
@@ -98,6 +106,12 @@ public class RequestParser {
 
             var headerName = line.substring(0, colonIndex).trim();
             var headerValue = line.substring(colonIndex + 1).trim();
+
+            // RFC 9112 §3.2: more than one Host header is a request-smuggling signal and must be rejected.
+            if (HttpHeader.HOST.getValue().equalsIgnoreCase(headerName) && headers.containsKey(headerName)) {
+                throw new ProtocolException("Duplicate Host header");
+            }
+
             headers.put(headerName, headerValue);
         }
 
@@ -105,8 +119,16 @@ public class RequestParser {
     }
 
     private String decodeRequestBody(HttpConnectionReader reader, Map<String, String> headers) throws IOException {
-        if (headers.containsKey(HttpHeader.CONTENT_LENGTH.getValue())) {
-            var contentLength = Integer.parseInt(headers.get(HttpHeader.CONTENT_LENGTH.getValue()));
+        var hasContentLength = headers.containsKey(HttpHeader.CONTENT_LENGTH.getValue());
+        var hasTransferEncoding = headers.containsKey(HttpHeader.TRANSFER_ENCODING.getValue());
+
+        // RFC 9112 §6.1: a message with both framing headers is a request-smuggling vector.
+        if (hasContentLength && hasTransferEncoding) {
+            throw new ProtocolException("Content-Length and Transfer-Encoding must not both be present");
+        }
+
+        if (hasContentLength) {
+            var contentLength = parseContentLength(headers.get(HttpHeader.CONTENT_LENGTH.getValue()));
             if (contentLength > MAX_BODY_SIZE) {
                 throw new ProtocolException("Request body too large: " + contentLength);
             }
@@ -121,17 +143,34 @@ public class RequestParser {
         return ""; // No body or unsupported format
     }
 
-    private boolean decodeKeepAlive(InsensitiveMap headers) {
-        var connectionHeader = headers.get(HttpHeader.CONNECTION.getValue());
-        if (connectionHeader == null) {
-            return true; // Default to keep-alive if no connection header is present
+    private int parseContentLength(String value) throws ProtocolException {
+        int contentLength;
+        try {
+            contentLength = Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            throw new ProtocolException("Invalid Content-Length: " + value);
         }
+
+        if (contentLength < 0) {
+            throw new ProtocolException("Invalid Content-Length: " + value);
+        }
+
+        return contentLength;
+    }
+
+    private boolean decodeKeepAlive(HttpVersion version, InsensitiveMap headers) {
+        var connectionHeader = headers.get(HttpHeader.CONNECTION.getValue());
 
         if (KEEP_ALIVE.getValue().equalsIgnoreCase(connectionHeader)) {
             return true;
         }
 
-        return !CLOSE.getValue().equalsIgnoreCase(connectionHeader);
+        if (CLOSE.getValue().equalsIgnoreCase(connectionHeader)) {
+            return false;
+        }
+
+        // No explicit directive: HTTP/1.1 defaults to keep-alive, HTTP/1.0 to close.
+        return version == HttpVersion.VERSION_1_1;
     }
 
     private String readChunkedBody(HttpConnectionReader reader) throws IOException {
@@ -142,6 +181,11 @@ public class RequestParser {
             if (chunkSize == 0) {
                 consumeTrailingLine(reader); // Consume the trailing empty line
                 break;
+            }
+
+            // Cap the aggregate body size; per-chunk limits alone leave chunked transfers unbounded.
+            if (body.size() + chunkSize > MAX_BODY_SIZE) {
+                throw new ProtocolException("Request body too large: exceeds " + MAX_BODY_SIZE + " bytes");
             }
 
             body.writeBytes(reader.readBody(chunkSize));
@@ -157,7 +201,24 @@ public class RequestParser {
             throw new ProtocolException("Unexpected end of stream while reading chunk size");
         }
 
-        int chunkSize = Integer.parseInt(line.trim(), 16);
+        // A chunk-size line may carry extensions after a ';' (RFC 9112 §7.1.1); ignore them.
+        var sizeToken = line.trim();
+        var extensionIndex = sizeToken.indexOf(';');
+        if (extensionIndex != -1) {
+            sizeToken = sizeToken.substring(0, extensionIndex).trim();
+        }
+
+        int chunkSize;
+        try {
+            chunkSize = Integer.parseInt(sizeToken, 16);
+        } catch (NumberFormatException e) {
+            throw new ProtocolException("Invalid chunk size: " + line);
+        }
+
+        if (chunkSize < 0) {
+            throw new ProtocolException("Invalid chunk size: " + line);
+        }
+
         if (chunkSize > MAX_CHUNK_SIZE) {
             throw new ProtocolException("Chunk size too large: " + chunkSize);
         }

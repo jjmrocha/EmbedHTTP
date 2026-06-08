@@ -300,7 +300,7 @@ class RequestParserTest {
     void testAcceptMaxHeaderCount() throws Exception {
         // given
         var builder = new StringBuilder();
-        builder.append("GET /test HTTP/1.1\r\n");
+        builder.append("GET /test HTTP/1.0\r\n"); // 1.0 so the Host requirement does not apply; header limits are version-independent
         for (int i = 0; i < 100; i++) { // Exactly 100 headers at the limit
             builder.append("Header-").append(i).append(": value\r\n");
         }
@@ -335,7 +335,7 @@ class RequestParserTest {
     void testAcceptHeaderAtMaxSize() throws Exception {
         // given
         var headerValue = "X".repeat(8178); // Total header line is exactly 8192 bytes
-        var rawRequest = "GET /test HTTP/1.1\r\n" +
+        var rawRequest = "GET /test HTTP/1.0\r\n" + // 1.0 so the Host requirement does not apply; header limits are version-independent
                 "Large-Header: " + headerValue + "\r\n" +
                 "\r\n";
         var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
@@ -487,5 +487,166 @@ class RequestParserTest {
         assertThat(result).isInstanceOf(ProtocolException.class);
         assertThat(result).hasMessageContaining("Unsupported HTTP version");
         assertThat(result).hasMessageContaining("http/1.1");
+    }
+
+    // --- M3: protocol hardening ---
+
+    @Test
+    void testRejectNonNumericContentLength() {
+        // given
+        var rawRequest = "POST /submit HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Content-Length: abc\r\n" +
+                "\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() -> classUnderTest.parseRequest(inputStream));
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Content-Length");
+    }
+
+    @Test
+    void testRejectNegativeContentLength() {
+        // given
+        var rawRequest = "POST /submit HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Content-Length: -5\r\n" +
+                "\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() -> classUnderTest.parseRequest(inputStream));
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Content-Length");
+    }
+
+    @Test
+    void testRejectInvalidChunkSize() {
+        // given
+        var rawRequest = "POST /upload HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Transfer-Encoding: chunked\r\n" +
+                "\r\n" +
+                "xyz\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() -> classUnderTest.parseRequest(inputStream));
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("chunk size");
+    }
+
+    @Test
+    void testParseChunkedBodyWithChunkExtension() throws Exception {
+        // given — a chunk-size line may carry extensions: "5;name=value"
+        var rawRequest = "POST /upload HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Transfer-Encoding: chunked\r\n" +
+                "\r\n" +
+                "5;name=value\r\n" +
+                "Hello\r\n" +
+                "0\r\n" +
+                "\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.getBody()).isEqualTo("Hello");
+    }
+
+    @Test
+    void testRejectChunkedBodyExceedingMaxAggregateSize() {
+        // given — ten 1MB chunks reach the 10MB cap; the eleventh must be rejected before reading
+        var oneMegabyte = "X".repeat(1024 * 1024);
+        var builder = new StringBuilder();
+        builder.append("POST /upload HTTP/1.1\r\n")
+                .append("Host: localhost\r\n")
+                .append("Transfer-Encoding: chunked\r\n")
+                .append("\r\n");
+        for (int i = 0; i < 10; i++) {
+            builder.append("100000\r\n").append(oneMegabyte).append("\r\n");
+        }
+        builder.append("100000\r\n"); // eleventh chunk size — would push past 10MB
+        var inputStream = new ByteArrayInputStream(builder.toString().getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() -> classUnderTest.parseRequest(inputStream));
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("too large");
+    }
+
+    @Test
+    void testRejectContentLengthAndTransferEncoding() {
+        // given — both framing headers present is a request-smuggling vector (RFC 9112 §6.1)
+        var rawRequest = "POST /submit HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Content-Length: 5\r\n" +
+                "Transfer-Encoding: chunked\r\n" +
+                "\r\n" +
+                "HELLO";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() -> classUnderTest.parseRequest(inputStream));
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+    }
+
+    @Test
+    void testHttp10DefaultsToCloseWithoutConnectionHeader() throws Exception {
+        // given
+        var rawRequest = """
+                GET /test HTTP/1.0\r
+                Host: localhost\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.isKeepAlive()).isFalse();
+    }
+
+    @Test
+    void testHttp10KeepAliveWithExplicitHeader() throws Exception {
+        // given
+        var rawRequest = """
+                GET /test HTTP/1.0\r
+                Host: localhost\r
+                Connection: keep-alive\r
+                \r
+                """;
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = classUnderTest.parseRequest(inputStream);
+        // then
+        assertThat(result.isKeepAlive()).isTrue();
+    }
+
+    @Test
+    void testRejectHttp11RequestWithoutHost() {
+        // given
+        var rawRequest = "GET /test HTTP/1.1\r\n\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() -> classUnderTest.parseRequest(inputStream));
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Host");
+    }
+
+    @Test
+    void testRejectDuplicateHostHeader() {
+        // given
+        var rawRequest = "GET /test HTTP/1.1\r\n" +
+                "Host: localhost\r\n" +
+                "Host: evil.example\r\n" +
+                "\r\n";
+        var inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+        // when
+        var result = catchThrowable(() -> classUnderTest.parseRequest(inputStream));
+        // then
+        assertThat(result).isInstanceOf(ProtocolException.class);
+        assertThat(result).hasMessageContaining("Host");
     }
 }
